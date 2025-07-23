@@ -17,8 +17,8 @@ This chatbot helps you:
 ## Getting Started
 
 ```bash
-git clone https://github.com/yourname/quality-assistant-ai.git
-cd quality-assistant-ai
+git clone https://github.com/yourname/QWalT.AI
+cd QWalT.AI
 pip install -r requirements.txt
 streamlit run app.py
 ```
