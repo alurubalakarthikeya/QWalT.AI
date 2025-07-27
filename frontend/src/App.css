@@ -238,7 +238,8 @@ body {
   .chat-wrapper{
     position: absolute;
     top: 0;
-    height: 95vh;
+    width: 100vw;
+    height: 93vh;
   }
   .question-buttons {
     grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
