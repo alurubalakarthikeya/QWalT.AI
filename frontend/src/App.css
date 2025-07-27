@@ -235,6 +235,9 @@ body {
 }
 
 @media (max-width: 480px) {
+  .chat-wrapper{
+    height: 92vh;
+  }
   .question-buttons {
     grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
     gap: 10px;
@@ -250,7 +253,7 @@ body {
 
   .chat-header .title {
     font-size: 26px;
-    padding: 11px;
+    padding: 5px;
   }
 
   .chat-input input,.chat-input button, .chat-message{
