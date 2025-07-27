@@ -236,7 +236,7 @@ body {
 
 @media (max-width: 480px) {
   .chat-wrapper{
-    height: 92vh;
+    height: 95vh;
   }
   .question-buttons {
     grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
