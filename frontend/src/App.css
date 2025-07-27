@@ -236,6 +236,8 @@ body {
 
 @media (max-width: 480px) {
   .chat-wrapper{
+    position: absolute;
+    top: 0;
     height: 95vh;
   }
   .question-buttons {
