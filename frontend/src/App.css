@@ -1,0 +1,260 @@
+@import url('https://fonts.googleapis.com/css2?family=TikTok+Sans:opsz,wght@12..36,300..900&display=swap');
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background-color: #000000;
+  font-family: "TikTok Sans", sans-serif;
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  padding: 0 16px;
+}
+
+.chat-wrapper {
+  width: 100%;
+  max-width: 100%; 
+  background: linear-gradient(to bottom right, #0d0d0d, #121212);
+  height: 100vh;
+  width: 100vw;
+  min-height: 500px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid #1f1f1f;
+  margin: 0 auto;
+  padding: 0;
+}
+
+.chat-header {
+  background-color: #0a0a0a;
+  color: #006db6;
+  padding: 18px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #1f1f1f;
+}
+
+.chat-header .title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.chat-header .mode {
+  background-color: #004466;
+  color: #eafaff;
+  border: 1px solid #007acc;
+  border-radius: 20px;
+  padding: 6px 16px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: background-color 0.3s ease;
+}
+
+.chat-header .mode:hover {
+  background-color: #006699;
+}
+
+.chat-body {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  scrollbar-width: thin;
+  scrollbar-color: #007acc #1a1a1a;
+}
+
+.chat-body::-webkit-scrollbar {
+  width: 8px;
+}
+
+.chat-body::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
+
+.chat-body::-webkit-scrollbar-thumb {
+  background-color: #007acc;
+  border-radius: 20px;
+}
+
+
+.chat-message {
+  padding: 14px 18px;
+  font-size: 14px;
+  max-width: 80%;
+  word-wrap: break-word;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+  margin: 6px 0;
+  transition: all 0.3s ease;
+}
+
+.chat-message.bot {
+  background: rgba(0, 51, 102, 0.5); 
+  color: #e0f7ff;
+  border: 1px solid rgba(0, 136, 255, 0.4);
+  border-radius: 16px 16px 16px 4px;
+  align-self: flex-start;
+  text-align: left;
+}
+
+.chat-message.user {
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 16px 16px 4px 16px;
+  align-self: flex-end;
+  text-align: right;
+}
+
+.chat-input {
+  display: flex;
+  padding: 18px;
+  background-color: #0a0a0a;
+  border-top: 1px solid #252525;
+  border-radius: 15px 15px 0 0 ;
+  box-shadow: 0 -1px 5px rgba(0, 0, 0, 0.4);
+}
+
+.chat-input input {
+  flex: 1;
+  background-color: #121212;
+  border: 1px solid #2c2c2c;
+  color: #f1f1f1;
+  padding: 12px 16px;
+  border-radius: 25px;
+  outline: none;
+  margin-right: 10px;
+  font-size: 15px;
+  transition: 0.3s ease;
+}
+
+.chat-input input::placeholder {
+  color: #888;
+  opacity: 0.8;
+  font-family: "TikTok Sans", sans-serif;
+}
+
+.chat-input input:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 5px #007bff33;
+}
+
+.chat-input button {
+  background: linear-gradient(135deg, #0050a2, #007bff);
+  font-family: "TikTok Sans", sans-serif;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 25px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 15px;
+  transition: 0.3s ease;
+}
+
+.chat-input button:hover {
+  background: linear-gradient(135deg, #0063c3, #0091ff);
+  box-shadow: 0 0 10px #007bff44;
+}
+
+
+@media (max-width: 768px) {
+  .chat-wrapper {
+    height: 100vh;
+    border-radius: 0;
+  }
+
+  body {
+    padding: 0;
+  }
+}
+
+
+.popular-questions {
+  padding: 6px 0px 16px 0px;
+  width: 100%;
+}
+
+.popular-questions h3 {
+  color: #ffffff;
+  font-size: 16px;
+}
+
+.question-buttons {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+}
+
+.question-buttons button {
+  background: rgba(255, 255, 255, 0.1); 
+  color: #e0f7ff;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 12px;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  backdrop-filter: blur(10px); 
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 4px 20px rgba(0, 0, 50, 0.2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: all 0.3s ease;
+}
+
+.question-buttons button:hover {
+  background: rgba(0, 170, 255, 0.25);
+  color: #ffffff;
+  border-color: rgba(0, 170, 255, 0.5);
+  box-shadow: 0 6px 24px rgba(0, 170, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.question-buttons {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px;
+  margin-top: 10px;
+}
+
+@media (max-width: 480px) {
+  .question-buttons {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 10px;
+  }
+
+  .question-buttons button {
+    font-size: 12px;
+    padding: 8px 12px;
+  }
+}
+
+@media (min-width: 1200px){
+
+  .chat-header .title {
+    font-size: 26px;
+    padding: 11px;
+  }
+
+  .chat-input input,.chat-input button, .chat-message{
+    font-family: "TikTok Sans", sans-serif; 
+    font-size: 2.1vh;
+  }
+}
