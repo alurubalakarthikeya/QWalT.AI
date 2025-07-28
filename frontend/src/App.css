@@ -38,7 +38,8 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid #1f1f1f;
+  border-radius: 0px 0px 20px 20px;
+  border-bottom: 1.7px solid #353535;
 }
 
 .chat-header .title {
@@ -104,7 +105,7 @@ body {
 .chat-message.bot {
   background: rgba(0, 51, 102, 0.5); 
   color: #e0f7ff;
-  border: 1px solid rgba(0, 136, 255, 0.4);
+  border: 1px solid #0063c3;
   border-radius: 16px 16px 16px 4px;
   align-self: flex-start;
   text-align: left;
@@ -155,7 +156,7 @@ body {
   display: flex;
   padding: 18px;
   background-color: #121212;
-  border-top: 1px solid #252525;
+  border-top:  2px solid #353535;
   border-radius: 15px 15px 0 0 ;
   box-shadow: 0 -1px 5px rgba(0, 0, 0, 0.4);
 }
