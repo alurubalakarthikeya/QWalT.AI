@@ -4,9 +4,9 @@ import '@fortawesome/fontawesome-free/css/all.min.css';
 
 const popularQuestions = [
   { text: 'Whats 7QC?' },
-  { text: 'Quality improvement?' },
+  { text: 'Quality upscale?' },
   { text: 'Whats Six Sigma' },
-  { text: 'What can you do?' }
+  { text: 'What can you do?' },
 ];
 
 export default function App() {
@@ -80,7 +80,6 @@ export default function App() {
           </div>
         )}
 
-        {/* Scroll Anchor */}
         <div ref={chatEndRef} />
       </div>
 
@@ -91,6 +90,15 @@ export default function App() {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
+        />
+                <label htmlFor="fileInput" className="file-upload-btn">
+          <i className="fa-solid fa-paperclip"></i> 
+        </label>
+        <input
+          type="file"
+          accept=".pdf,.txt,.doc,.docx,.png,.jpg,.jpeg,.gif,.webp"
+          style={{ display: 'none' }}
+          id="fileInput"
         />
         <button onClick={() => sendMessage()}>Send</button>
       </div>
