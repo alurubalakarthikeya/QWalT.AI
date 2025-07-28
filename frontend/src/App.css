@@ -93,7 +93,7 @@ body {
 .chat-message {
   padding: 14px 18px;
   font-size: 14px;
-  max-width: 80%;
+  max-width: 82%;
   word-wrap: break-word;
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
