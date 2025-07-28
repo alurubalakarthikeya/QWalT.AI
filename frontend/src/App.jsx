@@ -3,15 +3,18 @@ import './App.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 
 const popularQuestions = [
-  { text: 'Whats 7QC?' },
+  { text: 'What’s 7QC?' },
   { text: 'Quality upscale?' },
-  { text: 'Whats Six Sigma' },
+  { text: 'What’s Six Sigma?' },
   { text: 'What can you do?' },
 ];
 
 export default function App() {
   const [messages, setMessages] = useState([
-    { from: 'bot', text: "Hey! I'm QWalT. What do you want to know?" }
+    {
+      from: 'bot',
+      text: "Hey! I'm QWalT — your Quality Wizard AI. Ask me anything about quality improvement, Six Sigma, or process excellence!"
+    }
   ]);
   const [input, setInput] = useState('');
   const [isBotTyping, setIsBotTyping] = useState(false);
@@ -25,15 +28,31 @@ export default function App() {
     scrollToBottom();
   }, [messages, isBotTyping]);
 
-  const sendMessage = (msg = input) => {
+  const sendMessage = async (msg = input) => {
     if (!msg.trim()) return;
 
     setMessages(prev => [...prev, { from: 'user', text: msg }]);
-    setIsBotTyping(true);
     setInput('');
+    setIsBotTyping(true);
 
-    setTimeout(() => {
-      setIsBotTyping(false);
+    try {
+      const res = await fetch('http://localhost:8000/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ message: msg })
+      });
+
+      const data = await res.json();
+      const botResponse = data.reply || "Oops! No reply from server.";
+
+      setMessages(prev => [
+        ...prev,
+        { from: 'bot', text: botResponse }
+      ]);
+    } catch (err) {
+      console.error('Error:', err);
       setMessages(prev => [
         ...prev,
         {
@@ -41,8 +60,28 @@ export default function App() {
           text: `You asked: "${msg}"\n\nSorry, I'm currently offline. Try again later.`
         }
       ]);
-    }, 1500);
+    } finally {
+      setIsBotTyping(false);
+    }
   };
+
+  const renderBotMessage = (msg, idx) => (
+    <div key={idx} className="chat-message bot">
+      <div>
+        {msg.text}
+        <div className="popular-questions">
+          <h3>Popular Questions:</h3>
+          <div className="question-buttons">
+            {popularQuestions.map((q, i) => (
+              <button key={i} onClick={() => sendMessage(q.text)}>
+                {q.text}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <div className="chat-wrapper">
@@ -52,25 +91,15 @@ export default function App() {
       </div>
 
       <div className="chat-body">
-        {messages.map((msg, idx) => (
-          <div key={idx} className={`chat-message ${msg.from}`}>
-            <div>
-              {msg.text}
-              {msg.from === 'bot' && (
-                <div className="popular-questions">
-                  <h3>Popular Questions:</h3>
-                  <div className="question-buttons">
-                    {popularQuestions.map((q, i) => (
-                      <button key={i} onClick={() => sendMessage(q.text)}>
-                        {q.text}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        ))}
+        {messages.map((msg, idx) =>
+          msg.from === 'bot'
+            ? renderBotMessage(msg, idx)
+            : (
+              <div key={idx} className="chat-message user">
+                <div>{msg.text}</div>
+              </div>
+            )
+        )}
 
         {isBotTyping && (
           <div className="chat-message bot typing-indicator">
@@ -91,8 +120,9 @@ export default function App() {
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
         />
-                <label htmlFor="fileInput" className="file-upload-btn">
-          <i className="fa-solid fa-paperclip"></i> 
+
+        <label htmlFor="fileInput" className="file-upload-btn">
+          <i className="fa-solid fa-paperclip"></i>
         </label>
         <input
           type="file"
@@ -100,6 +130,7 @@ export default function App() {
           style={{ display: 'none' }}
           id="fileInput"
         />
+
         <button onClick={() => sendMessage()}>Send</button>
       </div>
     </div>
