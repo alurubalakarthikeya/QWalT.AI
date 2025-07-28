@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './App.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 
@@ -15,6 +15,15 @@ export default function App() {
   ]);
   const [input, setInput] = useState('');
   const [isBotTyping, setIsBotTyping] = useState(false);
+  const chatEndRef = useRef(null);
+
+  const scrollToBottom = () => {
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, isBotTyping]);
 
   const sendMessage = (msg = input) => {
     if (!msg.trim()) return;
@@ -32,14 +41,14 @@ export default function App() {
           text: `You asked: "${msg}"\n\nSorry, I'm currently offline. Try again later.`
         }
       ]);
-    }, 1500); // delay before bot reply
+    }, 1500);
   };
 
   return (
     <div className="chat-wrapper">
       <div className="chat-header">
         <h1 className="title"><i className="fa-solid fa-robot"></i> QWalT</h1>
-        <i className="fa-solid fa-bars"></i>
+        <button className="mode">Friendly</button>
       </div>
 
       <div className="chat-body">
@@ -70,6 +79,9 @@ export default function App() {
             <div className="typing-dot"></div>
           </div>
         )}
+
+        {/* Scroll Anchor */}
+        <div ref={chatEndRef} />
       </div>
 
       <div className="chat-input">
@@ -85,4 +97,3 @@ export default function App() {
     </div>
   );
 }
-
