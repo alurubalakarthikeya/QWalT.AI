@@ -32,6 +32,10 @@ body {
 }
 
 .chat-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
   background-color: #121212;
   color: white;
   padding: 18px 24px;
@@ -40,6 +44,7 @@ body {
   align-items: center;
   border-radius: 0px 0px 20px 20px;
   border-bottom: 1.7px solid #353535;
+  z-index: 99999;
 }
 
 .chat-header .title {
@@ -67,8 +72,7 @@ body {
 
 .chat-body {
   flex: 1;
-  padding: 20px;
-  padding-bottom: calc(80px + env(safe-area-inset-bottom));
+  padding: calc(90px + env(safe-area-inset-bottom)) 20px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
