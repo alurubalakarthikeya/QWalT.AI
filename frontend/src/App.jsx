@@ -58,7 +58,7 @@ export default function App() {
               {msg.text}
               {msg.from === 'bot' && (
                 <div className="popular-questions">
-                  <h3>💡 Popular Questions:</h3>
+                  <h3>Popular Questions:</h3>
                   <div className="question-buttons">
                     {popularQuestions.map((q, i) => (
                       <button key={i} onClick={() => sendMessage(q.text)}>
