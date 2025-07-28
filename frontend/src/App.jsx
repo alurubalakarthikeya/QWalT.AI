@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 
@@ -14,19 +14,26 @@ export default function App() {
     { from: 'bot', text: "Hey! I'm QWalT. What do you want to know?" }
   ]);
   const [input, setInput] = useState('');
+  const [isBotTyping, setIsBotTyping] = useState(false);
+
   const sendMessage = (msg = input) => {
     if (!msg.trim()) return;
+
     setMessages(prev => [...prev, { from: 'user', text: msg }]);
+    setIsBotTyping(true);
+    setInput('');
+
     setTimeout(() => {
+      setIsBotTyping(false);
       setMessages(prev => [
         ...prev,
-        { from: 'bot', text: `You asked: "${msg}"\n\nSorry, I'm currently offline. Try again later.` }
+        {
+          from: 'bot',
+          text: `You asked: "${msg}"\n\nSorry, I'm currently offline. Try again later.`
+        }
       ]);
-    }, 500);
-
-    setInput('');
+    }, 1500); // delay before bot reply
   };
-  
 
   return (
     <div className="chat-wrapper">
@@ -34,6 +41,7 @@ export default function App() {
         <h1 className="title"><i className="fa-solid fa-robot"></i> QWalT</h1>
         <i className="fa-solid fa-bars"></i>
       </div>
+
       <div className="chat-body">
         {messages.map((msg, idx) => (
           <div key={idx} className={`chat-message ${msg.from}`}>
@@ -45,7 +53,7 @@ export default function App() {
                   <div className="question-buttons">
                     {popularQuestions.map((q, i) => (
                       <button key={i} onClick={() => sendMessage(q.text)}>
-                         {q.text}
+                        {q.text}
                       </button>
                     ))}
                   </div>
@@ -54,7 +62,16 @@ export default function App() {
             </div>
           </div>
         ))}
+
+        {isBotTyping && (
+          <div className="chat-message bot typing-indicator">
+            <div className="typing-dot"></div>
+            <div className="typing-dot"></div>
+            <div className="typing-dot"></div>
+          </div>
+        )}
       </div>
+
       <div className="chat-input">
         <input
           type="text"
@@ -68,3 +85,4 @@ export default function App() {
     </div>
   );
 }
+
