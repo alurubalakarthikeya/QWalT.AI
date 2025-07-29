@@ -1,15 +1,11 @@
 <h2 align="center">KneadQuality AI</h2>
 
-## Project Overview
-
 **QWalT (Quality & Workflow AI Tool)** is your intelligent AI-powered assistant designed to:
 
 - Answer Quality Assurance (QA)-related queries
 - Analyze Standard Operating Procedures (SOPs)
 - Suggest actionable improvements in process and workflow
 - Help enterprises optimize operations through conversational AI
-
----
 
 ## Tech Stack
 
@@ -20,8 +16,6 @@
 - **Model**: OpenRouter LLM API
 - **Hosting**: Render, Vercel
 
----
-
 ## How It Works
 
 1. **User uploads a document or asks a QA-related query**
@@ -30,9 +24,7 @@
 4. **LLM** generates a high-quality, contextual answer
 5. The result is returned to the user in a clean UI
 
----
-
-## ⚙️ Setup Instructions
+## Setup Instructions
 
 ### 1. Clone the repo
 
@@ -63,6 +55,6 @@ npm run dev
 
 ## Developers:
 
-<a href="https://github.com/ayushsingh08-ds">Ayush Singh</a>
-<a href="https://github.com/ArjiJethin">Arji Jethin Naga Sai Eswar</a>
-<a href="https://github.com/alurubalakarthikeya">Aluru Bala Karthikeya</a>
+<a href="https://github.com/ayushsingh08-ds">@Ayush Singh</a><br>
+<a href="https://github.com/ArjiJethin">@Arji Jethin Naga Sai Eswar</a><br>
+<a href="https://github.com/alurubalakarthikeya">@Aluru Bala Karthikeya</a>
