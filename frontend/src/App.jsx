@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import "./App.css";
+import { getUserId } from './utils';
 import "@fortawesome/fontawesome-free/css/all.min.css";
 
 const popularQuestions = [
@@ -9,6 +10,7 @@ const popularQuestions = [
     { text: "What’s Six Sigma?" },
     { text: "What can you do?" },
 ];
+
 
 export default function App() {
     const [messages, setMessages] = useState([
@@ -125,51 +127,54 @@ export default function App() {
         });
     };
 
-    const sendMessage = async (msg = input) => {
-        if (!msg.trim()) return;
-        setMessages((prev) => [...prev, { from: "user", text: msg }]);
-        setInput("");
-        setIsBotTyping(true);
+const sendMessage = async (msg = input) => {
+    if (!msg.trim()) return;
+    setMessages((prev) => [...prev, { from: "user", text: msg }]);
+    setInput("");
+    setIsBotTyping(true);
 
-        const formData = new FormData();
-        formData.append("query", msg);
-        if (uploadedFiles.length) {
-            formData.append(
-                "file_name",
-                uploadedFiles[uploadedFiles.length - 1].name
-            );
-        }
+    const formData = new FormData();
+    formData.append("query", msg);
+    formData.append("user_id", getUserId());  // ✅ This line is missing currently
 
-        try {
-            const res = await fetch("http://localhost:8000/query", {
-                method: "POST",
-                body: formData,
-            });
+    if (uploadedFiles.length) {
+        formData.append(
+            "file_name",
+            uploadedFiles[uploadedFiles.length - 1].name
+        );
+    }
 
-            const data = await res.json();
-            console.log(">> /query response:", data);
+    try {
+        const res = await fetch("http://localhost:8000/query", {
+            method: "POST",
+            body: formData,
+        });
 
-            const botResponse =
-                data.result ||
-                data.error ||
-                "⚠️ AI didn’t reply. Check backend logs.";
-            setMessages((prev) => [
-                ...prev,
-                { from: "bot", text: botResponse },
-            ]);
-        } catch (err) {
-            console.error("Fetch failed:", err);
-            setMessages((prev) => [
-                ...prev,
-                {
-                    from: "bot",
-                    text: `You asked: "${msg}"\n\n🚫 Server is unreachable.`,
-                },
-            ]);
-        } finally {
-            setIsBotTyping(false);
-        }
-    };
+        const data = await res.json();
+        console.log(">> /query response:", data);
+
+        const botResponse =
+            data.result ||
+            data.error ||
+            "⚠️ AI didn’t reply. Check backend logs.";
+        setMessages((prev) => [
+            ...prev,
+            { from: "bot", text: botResponse },
+        ]);
+    } catch (err) {
+        console.error("Fetch failed:", err);
+        setMessages((prev) => [
+            ...prev,
+            {
+                from: "bot",
+                text: `You asked: "${msg}"\n\n🚫 Server is unreachable.`,
+            },
+        ]);
+    } finally {
+        setIsBotTyping(false);
+    }
+};
+
 
     const renderBotMessage = (msg, idx) => (
         <div key={idx} className="chat-message bot">
