@@ -1,12 +1,4 @@
-<img src="https://i.imgur.com/55ZJaQ3.gif" width="1000">
-
-<p align="center">
-  <a href="https://readme-typing-svg.demolab.com?font=Cutive&size=25&duration=2000&pause=1000&color=5BC0EB&width=800&height=70&lines=Welcome+to+QWalT!;AI-powered+Quality+%26+Workflow+Tool;Improve+QA+Processes+Efficiently">
-    <img src="https://readme-typing-svg.demolab.com?font=Cutive&size=25&duration=2000&pause=1000&color=5BC0EB&width=800&height=70&lines=Welcome+to+QWalT!;AI-powered+Quality+%26+Workflow+Tool;Improve+QA+Processes+Efficiently" alt="Typing SVG" />
-  </a>
-</p>
-
----
+<h2 align="center">KneadQuality AI</h2>
 
 ## Project Overview
 
