@@ -1,104 +1,103 @@
 from fastapi import FastAPI, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from dotenv import load_dotenv
 import os
-import shutil
-import faiss
-import openai
-from sentence_transformers import SentenceTransformer
-from typing import List
+import requests
+import json
 
-# === Config ===
-UPLOAD_DIR = "uploaded_docs"
-os.makedirs(UPLOAD_DIR, exist_ok=True)
-EMBEDDING_MODEL = SentenceTransformer("all-MiniLM-L6-v2")
+from utils.processor import process_and_store, query_vector_store
 
-# Simulated vector DB
-doc_texts = []
-doc_vectors = []
+load_dotenv()
 
-# === App Setup ===
 app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # use specific origin in prod
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# === Pydantic ===
-class QueryRequest(BaseModel):
-    message: str
-
-# === Helper ===
-def get_embedding(text: str):
-    return EMBEDDING_MODEL.encode([text])[0]
-
-def add_to_faiss(text: str):
-    vector = get_embedding(text)
-    doc_texts.append(text)
-    doc_vectors.append(vector)
-
-def search_similar(query: str, k=3):
-    if not doc_vectors:
-        return []
-
-    query_vec = get_embedding(query).reshape(1, -1)
-    index = faiss.IndexFlatL2(len(query_vec[0]))
-    index.add(np.array(doc_vectors))
-    D, I = index.search(query_vec, k)
-    return [doc_texts[i] for i in I[0]]
-
-def build_prompt(context: List[str], query: str):
-    return (
-        "Context:\n" + "\n---\n".join(context) +
-        "\n\nQuestion: " + query + "\nAnswer:"
-    )
-
-def get_llm_response(prompt: str):
-    import requests
-
-    response = requests.post(
-        "https://openrouter.ai/api/v1/chat/completions",
-        headers={
-            "Authorization": f"Bearer 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",
-            "Content-Type": "application/json"
-        },
-        json={
-            "model": "mistralai/mistral-7b-instruct",
-            "messages": [
-                {"role": "system", "content": "You're a helpful assistant."},
-                {"role": "user", "content": prompt}
-            ]
-        }
-    )
-    return response.json()["choices"][0]["message"]["content"]
-
-# === Endpoints ===
-
-@app.get("/")
-def root():
-    return {"message": "Bot Backend Running 🎉"}
+UPLOAD_DIR = os.getenv("UPLOAD_DIR", "documents")
+PROMPT_DIR = os.getenv("PROMPT_DIR", "prompts")
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+os.makedirs(PROMPT_DIR, exist_ok=True)
 
 @app.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
     file_path = os.path.join(UPLOAD_DIR, file.filename)
+    with open(file_path, "wb") as f:
+        f.write(await file.read())
 
-    with open(file_path, "wb") as buffer:
-        content = await file.read()  # Read once here
-        buffer.write(content)
-    text = content.decode("utf-8")
-    add_to_faiss(text)
+    process_and_store(file_path, file.filename)
 
-    return {"message": "File uploaded and indexed successfully."}
+    custom_prompt = f"You are an expert assistant for queries related to the document titled '{file.filename}'. Answer with clear and concise explanations based only on the given context."
+    with open(os.path.join(PROMPT_DIR, f"{file.filename}.json"), "w") as f:
+        json.dump({"system_prompt": custom_prompt}, f)
 
+    return {"message": f"{file.filename} uploaded, processed, and prompt saved.", "filename": file.filename}
 
-@app.post("/chat")
-def chat_with_bot(payload: QueryRequest):
-    query = payload.message
-    similar_chunks = search_similar(query)
-    prompt = build_prompt(similar_chunks, query)
-    answer = get_llm_response(prompt)
-    return {"response": answer}
+@app.post("/query")
+async def query_document(query: str = Form(...), file_name: str = Form(...)):
+    context = query_vector_store(query, file_name)
+
+    prompt_path = os.path.join(PROMPT_DIR, f"{file_name}.json")
+    if os.path.exists(prompt_path):
+        with open(prompt_path, "r") as f:
+            system_prompt = json.load(f)["system_prompt"]
+    else:
+        system_prompt = "You are a helpful assistant."
+
+    user_prompt = f"""Use the following context to answer naturally and clearly.
+
+Context:
+{context}
+
+Question:
+{query}
+
+Answer:"""
+
+    try:
+        api_key = os.getenv("OPENROUTER_API_KEY")
+        if not api_key:
+            return {"error": "Missing API key."}
+
+        response = requests.post(
+            "https://openrouter.ai/api/v1/chat/completions",
+            headers={
+                "Authorization": f"Bearer {os.getenv('OPENROUTER_API_KEY')}",
+                "Content-Type": "application/json"
+            },
+            json={
+                "model": "mistralai/mistral-7b-instruct",
+                "messages": [
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt}
+                ],
+                "max_tokens": 300,
+                "temperature": 0.7
+            }
+        )
+
+        print(">> OpenRouter response code:", response.status_code)
+        print(">> OpenRouter response body:", response.text)
+
+        if response.status_code == 200:
+            data = response.json()
+            choices = data.get("choices", [])
+            if choices and "message" in choices[0]:
+                ai_reply = choices[0]["message"]["content"]
+                return {"result": ai_reply}
+            else:
+                return {"error": "Empty or malformed response from model.", "raw": data}
+        else:
+            return {
+                "error": "AI request failed",
+                "status": response.status_code,
+                "body": response.text
+            }
+
+    except Exception as e:
+        return {"error": "Exception during AI call", "message": str(e)}
