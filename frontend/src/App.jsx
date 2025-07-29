@@ -18,6 +18,7 @@ export default function App() {
   ]);
   const [input, setInput] = useState('');
   const [isBotTyping, setIsBotTyping] = useState(false);
+  const [uploadedFileName, setUploadedFileName] = useState('');
   const chatEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -28,42 +29,63 @@ export default function App() {
     scrollToBottom();
   }, [messages, isBotTyping]);
 
-  const sendMessage = async (msg = input) => {
-    if (!msg.trim()) return;
+  const handleFileUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
 
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const res = await fetch("http://localhost:8000/upload", {
+        method: "POST",
+        body: formData
+      });
+      const data = await res.json();
+      setUploadedFileName(data.filename);
+      setMessages(prev => [...prev, { from: 'bot', text: `📄 ${data.filename} uploaded and ready for questions.` }]);
+    } catch (err) {
+      console.error("Upload failed:", err);
+      setMessages(prev => [...prev, { from: 'bot', text: "❌ File upload failed." }]);
+    }
+  };
+
+  const sendMessage = async (msg = input) => {
+    if (!msg.trim() || !uploadedFileName) {
+      alert("Please upload a file first.");
+      return;
+    }
+  
     setMessages(prev => [...prev, { from: 'user', text: msg }]);
     setInput('');
     setIsBotTyping(true);
-
+  
+    const formData = new FormData();
+    formData.append("query", msg);
+    formData.append("file_name", uploadedFileName);
+  
     try {
-      const res = await fetch('http://localhost:8000/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ message: msg })
+      const res = await fetch("http://localhost:8000/query", {
+        method: "POST",
+        body: formData
       });
-
+  
       const data = await res.json();
-      const botResponse = data.reply || "Oops! No reply from server.";
-
-      setMessages(prev => [
-        ...prev,
-        { from: 'bot', text: botResponse }
-      ]);
+      console.log(">> /query response:", data);
+  
+      const botResponse = data.result || data.error || "⚠️ AI didn’t reply. Check backend logs.";
+      setMessages(prev => [...prev, { from: 'bot', text: botResponse }]);
     } catch (err) {
-      console.error('Error:', err);
-      setMessages(prev => [
-        ...prev,
-        {
-          from: 'bot',
-          text: `You asked: "${msg}"\n\nSorry, I'm currently offline. Try again later.`
-        }
-      ]);
+      console.error("Fetch failed:", err);
+      setMessages(prev => [...prev, {
+        from: 'bot',
+        text: `You asked: "${msg}"\n\n🚫 Server is unreachable.`
+      }]);
     } finally {
       setIsBotTyping(false);
     }
   };
+  
 
   const renderBotMessage = (msg, idx) => (
     <div key={idx} className="chat-message bot">
@@ -73,9 +95,7 @@ export default function App() {
           <h3>Popular Questions:</h3>
           <div className="question-buttons">
             {popularQuestions.map((q, i) => (
-              <button key={i} onClick={() => sendMessage(q.text)}>
-                {q.text}
-              </button>
+              <button key={i} onClick={() => sendMessage(q.text)}>{q.text}</button>
             ))}
           </div>
         </div>
@@ -94,11 +114,7 @@ export default function App() {
         {messages.map((msg, idx) =>
           msg.from === 'bot'
             ? renderBotMessage(msg, idx)
-            : (
-              <div key={idx} className="chat-message user">
-                <div>{msg.text}</div>
-              </div>
-            )
+            : <div key={idx} className="chat-message user"><div>{msg.text}</div></div>
         )}
 
         {isBotTyping && (
@@ -108,7 +124,6 @@ export default function App() {
             <div className="typing-dot"></div>
           </div>
         )}
-
         <div ref={chatEndRef} />
       </div>
 
@@ -129,6 +144,7 @@ export default function App() {
           accept=".pdf,.txt,.doc,.docx,.png,.jpg,.jpeg,.gif,.webp"
           style={{ display: 'none' }}
           id="fileInput"
+          onChange={handleFileUpload}
         />
 
         <button onClick={() => sendMessage()}>Send</button>
