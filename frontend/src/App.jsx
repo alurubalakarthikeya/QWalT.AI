@@ -19,9 +19,8 @@ export default function App() {
     ]);
     const [input, setInput] = useState("");
     const [isBotTyping, setIsBotTyping] = useState(false);
-    const [uploadedFileName, setUploadedFileName] = useState("");
+    const [uploadedFiles, setUploadedFiles] = useState([]); // { name, progress, status }
     const [showModal, setShowModal] = useState(false);
-    const [uploadProgress, setUploadProgress] = useState(0);
     const chatEndRef = useRef(null);
 
     const scrollToBottom = () => {
@@ -32,54 +31,72 @@ export default function App() {
         scrollToBottom();
     }, [messages, isBotTyping]);
 
-    useEffect(() => {
-        if (uploadProgress === 100) {
-            const timeout = setTimeout(() => setShowModal(false), 1500);
-            return () => clearTimeout(timeout);
-        }
-    }, [uploadProgress]);
-
     const handleFileUpload = async (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
+        const files = Array.from(e.target.files);
+        if (!files.length) return;
 
-        const formData = new FormData();
-        formData.append("file", file);
+        const fileObjs = files.map((file) => ({
+            name: file.name,
+            progress: 0,
+            status: "uploading",
+        }));
 
-        try {
-            const res = await axios.post(
-                "http://localhost:8000/upload",
-                formData,
-                {
+        setUploadedFiles((prev) => [...prev, ...fileObjs]);
+
+        files.forEach((file, i) => {
+            const currentIndex = uploadedFiles.length + i;
+            const formData = new FormData();
+            formData.append("file", file);
+
+            axios
+                .post("http://localhost:8000/upload", formData, {
                     headers: { "Content-Type": "multipart/form-data" },
                     onUploadProgress: (progressEvent) => {
                         const percent = Math.round(
                             (progressEvent.loaded * 100) / progressEvent.total
                         );
-                        setUploadProgress(percent);
+                        setUploadedFiles((prev) =>
+                            prev.map((f, idx) =>
+                                idx === currentIndex
+                                    ? { ...f, progress: percent }
+                                    : f
+                            )
+                        );
                     },
-                }
-            );
-
-            const data = res.data;
-            setUploadedFileName(data.filename);
-            setMessages((prev) => [
-                ...prev,
-                {
-                    from: "bot",
-                    text: `📄 ${data.filename} uploaded and ready for questions.`,
-                },
-            ]);
-            setUploadProgress(0);
-        } catch (err) {
-            console.error("Upload failed:", err);
-            setMessages((prev) => [
-                ...prev,
-                { from: "bot", text: "❌ File upload failed." },
-            ]);
-            setShowModal(false);
-            setUploadProgress(0);
-        }
+                })
+                .then((res) => {
+                    const data = res.data;
+                    setUploadedFiles((prev) =>
+                        prev.map((f, idx) =>
+                            idx === currentIndex
+                                ? { ...f, progress: 100, status: "done" }
+                                : f
+                        )
+                    );
+                    setMessages((prev) => [
+                        ...prev,
+                        {
+                            from: "bot",
+                            text: `📄 ${data.filename} uploaded and ready for questions.`,
+                        },
+                    ]);
+                })
+                .catch((err) => {
+                    console.error("Upload failed:", err);
+                    setUploadedFiles((prev) =>
+                        prev.map((f, idx) =>
+                            idx === currentIndex ? { ...f, status: "error" } : f
+                        )
+                    );
+                    setMessages((prev) => [
+                        ...prev,
+                        {
+                            from: "bot",
+                            text: `❌ Upload failed for ${file.name}`,
+                        },
+                    ]);
+                });
+        });
     };
 
     const sendMessage = async (msg = input) => {
@@ -90,7 +107,12 @@ export default function App() {
 
         const formData = new FormData();
         formData.append("query", msg);
-        formData.append("file_name", uploadedFileName);
+        if (uploadedFiles.length) {
+            formData.append(
+                "file_name",
+                uploadedFiles[uploadedFiles.length - 1].name
+            );
+        }
 
         try {
             const res = await fetch("http://localhost:8000/query", {
@@ -183,8 +205,8 @@ export default function App() {
                 <button
                     className="file-upload-btn"
                     onClick={() => {
+                        setUploadedFiles([]);
                         setShowModal(true);
-                        setUploadProgress(0);
                     }}
                 >
                     <i className="fa-solid fa-paperclip"></i>
@@ -199,7 +221,7 @@ export default function App() {
                     onClick={() => setShowModal(false)}
                 >
                     <div
-                        className="upload-modal"
+                        className="upload-modal new-upload-layout"
                         onClick={(e) => e.stopPropagation()}
                         onDragOver={(e) => e.preventDefault()}
                         onDrop={(e) => {
@@ -211,35 +233,61 @@ export default function App() {
                             }
                         }}
                     >
-                        <h2>Upload File</h2>
+                        <button
+                            className="modal-close-btn"
+                            onClick={() => setShowModal(false)}
+                        >
+                            &times;
+                        </button>
 
-                        <div className="drag-drop-zone">
-                            <p>Drag & drop a file here</p>
-                            <p>or</p>
-                            <label
-                                htmlFor="hiddenFileInput"
-                                className="custom-file-btn"
-                            >
-                                Choose File
-                            </label>
-                            <input
-                                id="hiddenFileInput"
-                                type="file"
-                                accept=".pdf,.txt,.doc,.docx,.png,.jpg,.jpeg,.gif,.webp"
-                                onChange={handleFileUpload}
-                            />
-                        </div>
-
-                        {uploadProgress > 0 && (
-                            <div className="concentric-loader">
-                                <div className="circle-ring ring1"></div>
-                                <div className="circle-ring ring2"></div>
-                                <div className="circle-ring ring3"></div>
-                                <div className="percent-text">
-                                    {uploadProgress}%
-                                </div>
+                        <div className="modal-content-wrapper">
+                            <div className="drop-zone">
+                                <p>
+                                    <i className="fa-solid fa-cloud-arrow-up fa-lg"></i>
+                                </p>
+                                <p>Drag & Drop files here</p>
+                                <p>or</p>
+                                <label
+                                    htmlFor="hiddenFileInput"
+                                    className="custom-file-btn"
+                                >
+                                    Choose Files
+                                </label>
+                                <input
+                                    id="hiddenFileInput"
+                                    type="file"
+                                    onChange={handleFileUpload}
+                                    multiple
+                                    accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png,.webp"
+                                />
                             </div>
-                        )}
+
+                            <div className="file-list">
+                                {uploadedFiles.map((f, idx) => (
+                                    <div className="file-item" key={idx}>
+                                        <div className="file-icon">
+                                            <i className="fa-solid fa-file-lines"></i>
+                                        </div>
+                                        <div className="file-info">
+                                            <div className="file-name">
+                                                {f.name}
+                                            </div>
+                                            <div className="progress-bar">
+                                                <div
+                                                    className="progress-fill"
+                                                    style={{
+                                                        width: `${f.progress}%`,
+                                                    }}
+                                                ></div>
+                                            </div>
+                                        </div>
+                                        <div className="file-percent">
+                                            {f.progress}%
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}
