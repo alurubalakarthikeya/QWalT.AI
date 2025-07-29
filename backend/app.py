@@ -2,11 +2,11 @@ from fastapi import FastAPI, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 import os
-import requests
 import json
+import requests
 
-from utils.processor import process_and_store, query_vector_store
-
+from utils.embed_store import embed_and_store, query_vector_store
+from utils.extract_text import extract_text
 load_dotenv()
 
 app = FastAPI()
@@ -18,11 +18,14 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 UPLOAD_DIR = os.getenv("UPLOAD_DIR", "documents")
 PROMPT_DIR = os.getenv("PROMPT_DIR", "prompts")
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 os.makedirs(PROMPT_DIR, exist_ok=True)
+
+def process_and_store(file_path, file_name):
+    text = extract_text(file_path)
+    embed_and_store(text, file_name)
 
 @app.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
@@ -67,7 +70,7 @@ Answer:"""
         response = requests.post(
             "https://openrouter.ai/api/v1/chat/completions",
             headers={
-                "Authorization": f"Bearer {os.getenv('OPENROUTER_API_KEY')}",
+                "Authorization": f"Bearer {api_key}",
                 "Content-Type": "application/json"
             },
             json={
@@ -82,7 +85,7 @@ Answer:"""
         )
 
         print(">> OpenRouter response code:", response.status_code)
-        print(">> OpenRouter response body:", response.text)
+        print(">> OpenRouter response body:", response.text) ##for reference guyssss
 
         if response.status_code == 200:
             data = response.json()
