@@ -42,7 +42,7 @@ OPENROUTER_API_KEY=your_api_key_here
 ```bash
 cd backend
 pip install -r requirements.txt
-uvicorn main:app --reload
+uvicorn app:app --reload
 ```
 
 ### 4. Frontend Setup
