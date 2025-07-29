@@ -330,7 +330,7 @@ body {
     left: 0;
     width: 100vw;
     height: 100vh;
-    background-color: rgba(15, 23, 42, 0.6); /* stays static */
+    background-color: rgba(15, 23, 42, 0.6);
     backdrop-filter: blur(6px);
     display: flex;
     justify-content: center;
@@ -348,7 +348,15 @@ body {
         transform: translateY(0) scale(1);
     }
 }
-.upload-modal {
+
+.upload-modal.new-upload-layout {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    align-items: center;
+    animation: fadeInModal 0.3s ease-out;
+    width: 85%;
+    max-width: 800px;
     background: linear-gradient(
         to right,
         rgba(89, 203, 255, 0.2),
@@ -356,20 +364,73 @@ body {
     );
     border: 1px solid rgba(56, 189, 248, 0.5);
     border-radius: 16px;
-    padding: 30px;
-    width: 80%;
-    max-width: 600px;
+    padding: 40px 36px 36px 36px; /* increased padding inside */
+    margin: 20px;
     color: #e2e8f0;
     text-align: center;
     backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
     box-shadow: 0 2px 12px rgba(14, 165, 233, 0.2);
-    will-change: transform, opacity;
-    animation: fadeInModal 0.3s ease-out;
 }
 
 .upload-modal input[type="file"] {
     display: none;
+}
+
+/* === Close Button === */
+.modal-close-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    color: #f87171;
+    border: none;
+    font-size: 20px;
+    font-weight: bold;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    backdrop-filter: blur(6px);
+    transition: all 0.3s ease;
+}
+
+.modal-close-btn:hover {
+    background: rgba(248, 113, 113, 0.2);
+    color: #fecaca;
+    box-shadow: 0 0 10px rgba(248, 113, 113, 0.4);
+}
+
+/* === Modal Content Wrapper === */
+.modal-content-wrapper {
+    display: flex;
+    gap: 30px;
+    width: 100%;
+    justify-content: space-between;
+}
+
+/* === Drop Zone === */
+.drop-zone {
+    flex: 1;
+    border: 2px dashed rgba(56, 189, 248, 0.4);
+    padding: 30px 20px;
+    border-radius: 16px;
+    color: #94a3b8;
+    font-size: 14px;
+    backdrop-filter: blur(6px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.drop-zone:hover {
+    background: rgba(56, 189, 248, 0.05);
+    border-color: #38bdf8;
+    color: #e2e8f0;
 }
 
 .custom-file-btn {
@@ -382,7 +443,6 @@ body {
     font-size: 15px;
     font-family: "TikTok Sans", sans-serif;
     margin-top: 16px;
-    display: inline-block;
     transition: all 0.3s ease;
     backdrop-filter: blur(10px);
     box-shadow: 0 4px 10px rgba(56, 189, 248, 0.08);
@@ -393,88 +453,125 @@ body {
     box-shadow: 0 6px 20px rgba(56, 189, 248, 0.2);
 }
 
-/* === Concentric Loader === */
-.concentric-loader {
-    position: relative;
-    width: 140px;
-    height: 140px;
-    margin: 40px auto 10px;
+/* === File List === */
+.file-list {
+    flex: 1.2;
+    max-height: 320px;
+    overflow-y: auto;
+    padding-right: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    scrollbar-width: none; /* Firefox */
 }
 
-.circle-ring {
-    position: absolute;
-    top: 0;
-    left: 0;
+.file-list::-webkit-scrollbar {
+    display: none;
+}
+
+.file-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 12px 16px;
+    border-radius: 12px;
+    border: 1px solid rgba(56, 189, 248, 0.15);
+    backdrop-filter: blur(8px);
+    min-width: 0;
+}
+
+.file-icon {
+    flex-shrink: 0;
+    font-size: 24px;
+    color: #60a5fa;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(8px);
+}
+
+.file-info {
+    flex: 1;
+    overflow: hidden;
+}
+
+.file-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    font-size: 15px;
+    color: #e2e8f0;
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+
+/* === Progress === */
+.progress-bar {
     width: 100%;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-fill {
     height: 100%;
-    border: 3px solid transparent;
-    border-radius: 50%;
-    animation: spin 1.5s linear infinite;
-    background: conic-gradient(#3b82f6, #06b6d4, #38bdf8, #3b82f6);
-    -webkit-mask: radial-gradient(
-        farthest-side,
-        transparent calc(100% - 5px),
-        black 100%
-    );
-    mask: radial-gradient(
-        farthest-side,
-        transparent calc(100% - 5px),
-        black 100%
-    );
+    background: linear-gradient(90deg, #38bdf8, #0ea5e9);
+    transition: width 0.4s ease;
 }
 
-.ring1 {
-    animation-duration: 2s;
-    opacity: 0.4;
-    --scale: 1;
-}
-
-.ring2 {
-    animation-duration: 3s;
-    opacity: 0.3;
-    --scale: 0.7;
-}
-
-.ring3 {
-    animation-duration: 4s;
-    opacity: 0.2;
-    --scale: 0.4;
-}
-
-@keyframes spin {
-    0% {
-        transform: rotate(0deg) scale(var(--scale));
-    }
-    100% {
-        transform: rotate(360deg) scale(var(--scale));
-    }
-}
-
-.percent-text {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 20px;
-    color: #e2e8f0;
-    font-weight: bold;
-}
-
-.drag-drop-zone {
-    border: 2px dashed rgba(56, 189, 248, 0.4);
-    padding: 30px 20px;
-    border-radius: 16px;
-    margin-top: 20px;
-    color: #94a3b8;
+.file-percent {
     font-size: 14px;
-    backdrop-filter: blur(6px);
-    transition: all 0.3s ease;
+    font-weight: bold;
+    color: #38bdf8;
+    width: 40px;
+    text-align: right;
 }
 
-.drag-drop-zone:hover {
-    background: rgba(56, 189, 248, 0.05);
-    border-color: #38bdf8;
-    color: #e2e8f0;
+@media (max-width: 768px) {
+    .upload-modal.new-upload-layout {
+        width: 95%;
+        padding: 28px 20px;
+        margin: 16px; /* adds gap from screen edges */
+    }
+
+    .modal-content-wrapper {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .drop-zone,
+    .file-list {
+        width: 100%;
+    }
+
+    .file-list {
+        max-height: 200px;
+        padding-right: 0;
+    }
+
+    .file-name {
+        font-size: 14px;
+    }
+
+    .custom-file-btn {
+        font-size: 14px;
+        padding: 10px 20px;
+    }
+
+    .modal-close-btn {
+        top: 8px;
+        right: 8px;
+        width: 30px;
+        height: 30px;
+        font-size: 18px;
+    }
 }
 
 /* === End of Modal Styles === */
