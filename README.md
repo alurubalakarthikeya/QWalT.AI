@@ -56,5 +56,5 @@ npm run dev
 ## Developers:
 
 <a href="https://github.com/ayushsingh08-ds">@Ayush Singh</a><br>
-<a href="https://github.com/ArjiJethin">@Arji Jethin Naga Sai Eswar</a><br>
+<a href="https://github.com/ArjiJethin">@Arji Jethin Naga Sai Eswar</a><br> --> (This nigga free loading)
 <a href="https://github.com/alurubalakarthikeya">@Aluru Bala Karthikeya</a>
