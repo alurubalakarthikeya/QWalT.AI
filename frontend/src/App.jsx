@@ -19,12 +19,38 @@ export default function App() {
     ]);
     const [input, setInput] = useState("");
     const [isBotTyping, setIsBotTyping] = useState(false);
-    const [uploadedFiles, setUploadedFiles] = useState([]); // { name, progress, status }
+    const [uploadedFiles, setUploadedFiles] = useState([]);
     const [showModal, setShowModal] = useState(false);
+    const [backToTop, setBackToTop] = useState(false); // ← New toggle state
+
     const chatEndRef = useRef(null);
+    const chatBodyRef = useRef(null); // ← New ref
 
     const scrollToBottom = () => {
         chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    };
+
+    const scrollToTop = () => {
+        chatBodyRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+    };
+
+    const handleScrollToggle = () => {
+        const el = chatBodyRef.current;
+        if (!el) return;
+
+        if (el.scrollTop + el.clientHeight >= el.scrollHeight - 10) {
+            // At bottom → scroll to top
+            scrollToTop();
+            setBackToTop(true);
+        } else if (el.scrollTop <= 10) {
+            // At top → scroll to bottom
+            scrollToBottom();
+            setBackToTop(false);
+        } else {
+            // In middle → scroll based on toggle state
+            backToTop ? scrollToBottom() : scrollToTop();
+            setBackToTop(!backToTop);
+        }
     };
 
     useEffect(() => {
@@ -172,7 +198,17 @@ export default function App() {
                 <button className="mode">Friendly</button>
             </div>
 
-            <div className="chat-body">
+            {/* Back to Top/Bottom Button */}
+            <button
+                className="scroll-toggle-btn"
+                onClick={handleScrollToggle}
+                title={backToTop ? "Scroll to Bottom" : "Scroll to Top"}
+            >
+                <i className={`fa-solid ${backToTop ? "fa-arrow-down" : "fa-arrow-up"}`}></i>
+
+            </button>
+
+            <div className="chat-body" ref={chatBodyRef}>
                 {messages.map((msg, idx) =>
                     msg.from === "bot" ? (
                         renderBotMessage(msg, idx)
@@ -242,10 +278,8 @@ export default function App() {
 
                         <div className="modal-content-wrapper">
                             <div className="drop-zone">
-                                <p>
-                                    <i className="fa-solid fa-cloud-arrow-up fa-lg"></i>
-                                </p>
-                                <p>Drag & Drop files here</p>
+                                <img className="upload-img" src="./src/assets/download.png" alt="upload files here" />
+                                <p>Drag & drop files here</p>
                                 <p>or</p>
                                 <label
                                     htmlFor="hiddenFileInput"

@@ -106,7 +106,6 @@ body {
 .chat-message {
     padding: 14px 18px;
     font-size: 14px;
-    max-width: 85%;
     word-wrap: break-word;
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
@@ -212,7 +211,8 @@ body {
     background-color: #1e293b85;
     border: 1px solid #5b626c;
     color: #38bdf8;
-    font-size: 14px;
+    font-size: 10px;
+    font-weight: 100;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -220,6 +220,10 @@ body {
     transition: background 0.3s ease;
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
+}
+
+.file-upload-btn i {
+    font-size: 12px;
 }
 
 .file-upload-btn:hover {
@@ -255,6 +259,7 @@ body {
     flex-shrink: 0;
     padding: 10px 22px;
     font-size: 15px;
+    font-family: "TikTok Sans", sans-serif;
     font-weight: 600;
     color: #ffffff;
     background: linear-gradient(
@@ -382,7 +387,7 @@ body {
     top: 8px;
     right: 8px;
     background: rgba(255, 255, 255, 0.05);
-    color: #f87171;
+    color: #f37676;
     border: none;
     font-size: 20px;
     font-weight: bold;
@@ -537,8 +542,18 @@ body {
 @media (max-width: 768px) {
     .upload-modal.new-upload-layout {
         width: 95%;
-        padding: 28px 20px;
-        margin: 16px; /* adds gap from screen edges */
+        padding: 45px 20px 20px 20px; 
+        margin: 16px; 
+    }
+
+    .upload-img{
+        opacity: 0.35;
+        height: 130px;
+        width: 170px;
+    }
+
+    .chat-message {
+        max-width: 85%;
     }
 
     .modal-content-wrapper {
@@ -621,8 +636,45 @@ body {
         font-family: "TikTok Sans", sans-serif;
         font-size: 2.1vh;
     }
+    .chat-message{
+        max-width: 60%;
+        margin: 0px 30px;
+    }
     .chat-message.bot {
         padding: 15px 35px;
         margin-left: 20px;
     }
+
+    .upload-img {
+        height: 150px;
+        width: 200px;
+        opacity: 0.35;
+    }
 }
+
+.scroll-toggle-btn {
+    position: fixed;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    bottom: 100px;
+    right: 20px;
+    width: 20px;
+    height: 50px;
+    background: rgba(14, 165, 233, 0.2);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(56, 189, 248, 0.4);
+    color: #e0f2fe;
+    font-size: 13px;
+    font-weight: 100;
+    padding: 10px 12px;
+    border-radius: 20px;
+    cursor: pointer;
+    z-index: 1000;
+    transition: transform 0.3s ease;
+  }
+  
+  .scroll-toggle-btn:hover {
+    background: rgba(14, 165, 233, 0.35);
+  }
+
