@@ -51,41 +51,38 @@ export default function App() {
   };
 
   const sendMessage = async (msg = input) => {
-    if (!msg.trim() || !uploadedFileName) {
-      alert("Please upload a file first.");
-      return;
-    }
-  
+    if (!msg.trim()) return;
     setMessages(prev => [...prev, { from: 'user', text: msg }]);
     setInput('');
     setIsBotTyping(true);
-  
+
     const formData = new FormData();
     formData.append("query", msg);
     formData.append("file_name", uploadedFileName);
-  
+
     try {
       const res = await fetch("http://localhost:8000/query", {
         method: "POST",
         body: formData
       });
-  
+
       const data = await res.json();
       console.log(">> /query response:", data);
-  
+
       const botResponse = data.result || data.error || "⚠️ AI didn’t reply. Check backend logs.";
       setMessages(prev => [...prev, { from: 'bot', text: botResponse }]);
     } catch (err) {
       console.error("Fetch failed:", err);
       setMessages(prev => [...prev, {
         from: 'bot',
-        text: `You asked: "${msg}"\n\n🚫 Server is unreachable.`
+        text: `You asked: "${msg}"
+
+🚫 Server is unreachable.`
       }]);
     } finally {
       setIsBotTyping(false);
     }
   };
-  
 
   const renderBotMessage = (msg, idx) => (
     <div key={idx} className="chat-message bot">

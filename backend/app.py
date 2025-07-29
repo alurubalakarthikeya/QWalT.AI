@@ -2,15 +2,20 @@ from fastapi import FastAPI, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 import os
-import requests
 import json
+import requests
 
-from utils.processor import process_and_store, query_vector_store
+# Custom utilities
+from utils.embed_store import embed_and_store, query_vector_store
+from utils.extract_text import extract_text
 
+# Load environment variables
 load_dotenv()
 
+# FastAPI app initialization
 app = FastAPI()
 
+# Enable CORS (allow all origins for now)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -19,11 +24,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Directory paths
 UPLOAD_DIR = os.getenv("UPLOAD_DIR", "documents")
 PROMPT_DIR = os.getenv("PROMPT_DIR", "prompts")
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 os.makedirs(PROMPT_DIR, exist_ok=True)
 
+# Combine all steps to process a document
+def process_and_store(file_path, file_name):
+    text = extract_text(file_path)
+    embed_and_store(text, file_name)
+
+# Endpoint to upload and process a document
 @app.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
     file_path = os.path.join(UPLOAD_DIR, file.filename)
@@ -32,12 +44,14 @@ async def upload_file(file: UploadFile = File(...)):
 
     process_and_store(file_path, file.filename)
 
+    # Custom system prompt per file
     custom_prompt = f"You are an expert assistant for queries related to the document titled '{file.filename}'. Answer with clear and concise explanations based only on the given context."
     with open(os.path.join(PROMPT_DIR, f"{file.filename}.json"), "w") as f:
         json.dump({"system_prompt": custom_prompt}, f)
 
     return {"message": f"{file.filename} uploaded, processed, and prompt saved.", "filename": file.filename}
 
+# Endpoint to query the document
 @app.post("/query")
 async def query_document(query: str = Form(...), file_name: str = Form(...)):
     context = query_vector_store(query, file_name)
@@ -67,7 +81,7 @@ Answer:"""
         response = requests.post(
             "https://openrouter.ai/api/v1/chat/completions",
             headers={
-                "Authorization": f"Bearer {os.getenv('OPENROUTER_API_KEY')}",
+                "Authorization": f"Bearer {api_key}",
                 "Content-Type": "application/json"
             },
             json={
