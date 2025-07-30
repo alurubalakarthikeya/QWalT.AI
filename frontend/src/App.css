@@ -387,10 +387,10 @@ body {
     top: 8px;
     right: 8px;
     background: rgba(255, 255, 255, 0.05);
-    color: #f37676;
+    color: #ffffff;
     border: none;
-    font-size: 20px;
-    font-weight: bold;
+    font-size: 12px;
+    font-weight: 450;
     border-radius: 50%;
     width: 32px;
     height: 32px;
@@ -554,6 +554,10 @@ body {
         width: 95%;
         padding: 45px 20px 20px 20px; 
         margin: 16px; 
+    }
+
+    .modal-close-btn i {
+        font-size: 10px;
     }
 
     .upload-img{
