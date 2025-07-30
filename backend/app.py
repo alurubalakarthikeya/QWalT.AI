@@ -1,13 +1,41 @@
-from fastapi import FastAPI, UploadFile, File, Form
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 from dotenv import load_dotenv
+from uuid import uuid4
+
 import os
 import json
 import requests
-
 from utils.embed_store import embed_and_store, query_vector_store
 from utils.extract_text import extract_text
 load_dotenv()
+# stores chat history as json 
+HISTORY_DIR = "history_logs"
+os.makedirs(HISTORY_DIR, exist_ok=True)  # Ensure directory exists
+
+def get_history_file(user_id):
+    return os.path.join(HISTORY_DIR, f"{user_id}.json")
+
+def load_history(user_id):
+    filepath = get_history_file(user_id)
+    if os.path.exists(filepath):
+        with open(filepath, "r") as f:
+            return json.load(f)
+    return []
+
+def save_to_history(user_id, role, message):
+    filepath = get_history_file(user_id)
+    history = load_history(user_id)
+    history.append({"role": role, "message": message})
+    with open(filepath, "w") as f:
+        json.dump(history, f, indent=2)
+
+
+# Pydantic model for JSON requests
+class QueryRequest(BaseModel):
+    query: str
+    file_name: str = None
 
 app = FastAPI()
 
@@ -27,6 +55,28 @@ def process_and_store(file_path, file_name):
     text = extract_text(file_path)
     embed_and_store(text, file_name)
 
+@app.post("/chat/")
+async def chat(request: Request):
+    data = await request.json()
+    user_id = data.get("user_id") or str(uuid4())  # If user_id not passed, generate new
+
+    query = data["query"]
+
+    # Save the user message
+    save_to_history(user_id, "user", query)
+
+    # Get the chat history (optional: pass to LLM for context)
+    chat_history = load_history(user_id)
+
+    # Your existing logic goes here (LLM or RAG with FAISS)
+    # For now, fake response:
+    response = f"I received: '{query}' and have {len(chat_history)} messages in history."
+
+    # Save bot response
+    save_to_history(user_id, "bot", response)
+
+    return {"response": response, "user_id": user_id}
+
 @app.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
     file_path = os.path.join(UPLOAD_DIR, file.filename)
@@ -42,15 +92,30 @@ async def upload_file(file: UploadFile = File(...)):
     return {"message": f"{file.filename} uploaded, processed, and prompt saved.", "filename": file.filename}
 
 @app.post("/query")
-async def query_document(query: str = Form(...), file_name: str = Form(...)):
-    context = query_vector_store(query, file_name)
+async def query_document(query: str = Form(...), file_name: str = Form(None), user_id: str = Form(None)):
+    # Validate inputs
+    if not query or not query.strip():
+        raise HTTPException(status_code=400, detail="Query cannot be empty")
+    
+    print(f">> Received query: '{query}' for file: '{file_name}'")
+    
+    # If no file is specified, use a default context or handle gracefully
+    if not file_name:
+        print(">> No file specified, using default context")
+        context = "No specific document context available."
+    else:
+        try:
+            context = query_vector_store(query, file_name)
+        except Exception as e:
+            print(f">> Error querying vector store: {e}")
+            raise HTTPException(status_code=500, detail=f"Error retrieving context: {str(e)}")
 
-    prompt_path = os.path.join(PROMPT_DIR, f"{file_name}.json")
-    if os.path.exists(prompt_path):
+    prompt_path = os.path.join(PROMPT_DIR, f"{file_name}.json") if file_name else None
+    if prompt_path and os.path.exists(prompt_path):
         with open(prompt_path, "r") as f:
             system_prompt = json.load(f)["system_prompt"]
     else:
-        system_prompt = "You are a helpful assistant."
+        system_prompt = "You are a helpful assistant specializing in quality management and process improvement."
 
     user_prompt = f"""Use the following context to answer naturally and clearly.
 
@@ -92,6 +157,9 @@ Answer:"""
             choices = data.get("choices", [])
             if choices and "message" in choices[0]:
                 ai_reply = choices[0]["message"]["content"]
+                if user_id:
+                    save_to_history(user_id, "user", query)
+                    save_to_history(user_id, "bot", ai_reply)
                 return {"result": ai_reply}
             else:
                 return {"error": "Empty or malformed response from model.", "raw": data}
@@ -103,4 +171,11 @@ Answer:"""
             }
 
     except Exception as e:
-        return {"error": "Exception during AI call", "message": str(e)}
+        print(f">> Exception during AI call: {e}")
+        raise HTTPException(status_code=500, detail=f"AI service error: {str(e)}")
+
+
+@app.post("/query-json")
+async def query_document_json(request: QueryRequest):
+    """Alternative JSON endpoint for queries"""
+    return await query_document(request.query, request.file_name)
