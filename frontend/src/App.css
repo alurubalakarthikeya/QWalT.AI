@@ -61,8 +61,7 @@ body {
     letter-spacing: 1px;
     color: #e2e8f0;
 }
-
-.chat-header .mode {
+.mode {
     background: rgba(14, 165, 233, 0.2);
     font-family: "TikTok Sans", sans-serif;
     color: #e2e8f0;
@@ -74,7 +73,7 @@ body {
     transition: background-color 0.3s ease;
 }
 
-.chat-header .mode:hover {
+.mode:hover {
     background: rgba(56, 189, 248, 0.3);
 }
 
@@ -603,7 +602,7 @@ body {
     }
     
     .install-banner{
-        min-width: 84%;
+        min-width: 85%;
         padding: 16px;
         gap: 12px;
     }
@@ -622,6 +621,13 @@ body {
     .chat-body .chat-message:last-child {
         margin-bottom: 100px;
     }
+
+    .log-img {
+        width: 120px;
+        height: 110px;
+        object-fit: cover;
+        margin-bottom: 16px;
+      }
 }
 
 @media (max-width: 480px) {
@@ -676,6 +682,13 @@ body {
         padding: 16px;
         gap: 12px;
     }
+
+    .log-img {
+        width: 220px;
+        height: 220px;
+        object-fit: cover;
+        margin-bottom: 16px;
+      }
 }
 
 .scroll-toggle-btn {
@@ -735,12 +748,9 @@ body {
     font-size: 1.1rem;
     font-weight: 500;
   }
-  
-  .log-img {
-    width: 100px;
-    height: 100px;
-    object-fit: cover;
-    margin-bottom: 16px;
+
+  .full{
+    width: 100%;
   }
 
   .install-icon{
