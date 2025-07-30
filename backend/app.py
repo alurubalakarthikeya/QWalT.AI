@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from dotenv import load_dotenv
 from uuid import uuid4
+from typing import List, Union
 
 import os
 import json
@@ -87,6 +88,7 @@ async def upload_file(file: UploadFile = File(...)):
         f.write(await file.read())
 
     process_and_store(file_path, file.filename)
+    print(f"Parsed filename list: {file.filename}")
 
     custom_prompt = f"You are an expert assistant for queries related to the document titled '{file.filename}'. Answer with clear and concise explanations based only on the given context."
     with open(os.path.join(PROMPT_DIR, f"{file.filename}.json"), "w") as f:
@@ -94,22 +96,42 @@ async def upload_file(file: UploadFile = File(...)):
 
     return {"message": f"{file.filename} uploaded, processed, and prompt saved.", "filename": file.filename}
 
+from typing import List, Union
+from fastapi import Form
+
 @app.post("/query")
-async def query_document(query: str = Form(...), file_name: str = Form(None), user_id: str = Form(None)):
+async def query_document(
+    query: str = Form(...),
+    file_name: Union[List[str], str, None] = Form(None),
+    user_id: str = Form(None)
+):
     if not query or not query.strip():
         raise HTTPException(status_code=400, detail="Query cannot be empty")
 
-    print(f">> Received query: '{query}' for file: '{file_name}'")
+    print(f">> Received query: '{query}' for files: '{file_name}'")
 
-    context = "No specific document context available."
-    if file_name:
+    # Ensure file_name is a list
+    if isinstance(file_name, str):
+        file_name = [file_name]
+    elif file_name is None:
+        file_name = []
+
+    context_parts = []
+
+    for fname in file_name:
         try:
-            context = query_vector_store(query, file_name)
+            ctx = query_vector_store(query, fname)
+            context_parts.append(f"From {fname}:\n{ctx}")
         except Exception as e:
-            print(f">> Error querying vector store: {e}")
-            raise HTTPException(status_code=500, detail=f"Error retrieving context: {str(e)}")
+            print(f">> Error querying vector store for {fname}: {e}")
 
-    prompt_path = os.path.join(PROMPT_DIR, f"{file_name}.json") if file_name else None
+    context = "\n\n".join(context_parts) if context_parts else "No specific document context available."
+    print(">>> Final context sent to LLM:\n", context)
+
+    # Determine prompt file (use first one if multiple)
+    prompt_file = file_name[0] if file_name else None
+    prompt_path = os.path.join(PROMPT_DIR, f"{prompt_file}.json") if prompt_file else None
+
     if prompt_path and os.path.exists(prompt_path):
         with open(prompt_path, "r") as f:
             system_prompt = json.load(f)["system_prompt"]
@@ -197,7 +219,7 @@ Answer:"""
     except Exception as e:
         print(f">> Exception during AI call: {e}")
         raise HTTPException(status_code=500, detail=f"AI service error: {str(e)}")
-    
+
 @app.post("/query-json")
 async def query_document_json(request: QueryRequest):
     """Alternative JSON endpoint for queries"""
