@@ -344,23 +344,10 @@ export default function App() {
       </div>
 
       {showInstallBtn && (
-        <button
-          onClick={handleInstallClick}
-          style={{
-            position: "fixed",
-            bottom: "250px",
-            right: "250px",
-            padding: "10px 20px",
-            background: "#2c628f",
-            color: "#fff",
-            border: "none",
-            borderRadius: "10px",
-            fontWeight: "bold",
-            cursor: "pointer",
-          }}
-        >
-          Install App
-        </button>
+        <div className="install-banner">
+          <p>Install QWalT.AI App now for a better experience!</p>
+          <button onClick={handleInstallClick}>Install</button>
+        </div>
       )}
     </div>
   );
