@@ -4,6 +4,7 @@ import "./App.css";
 import { getUserId } from "./utils";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import uploadImg from "./assets/download.png";
+import logo from "./assets/logo.png"
 
 export default function App() {
   const [messages, setMessages] = useState([
@@ -345,7 +346,10 @@ export default function App() {
 
       {showInstallBtn && (
         <div className="install-banner">
+          <div className="install-icon">
           <p>Install QWalT.AI App now for a better experience!</p>
+          <img className="log-img" src={logo} alt="img" />
+          </div>
           <button onClick={handleInstallClick}>Install</button>
         </div>
       )}
