@@ -8,155 +8,193 @@ import uploadImg from "./assets/download.png";
 export default function App() {
     const [messages, setMessages] = useState([
         {
-            from: "bot",
-            text: "Hey! I'm QWalT — your Quality Wizard AI. Ask me anything about quality improvement, Six Sigma, or process excellence!",
+          from: "bot",
+          text: "Hey! I'm QWalT — your Quality Wizard AI. Ask me anything about quality improvement, Six Sigma, or process excellence!",
+          relatedQuestions: [
+            { text: "What’s 7QC?" },
+            { text: "Quality upscale?" },
+            { text: "What’s Six Sigma?" },
+            { text: "What can you do?" },
+          ],
         },
-    ]);
-    const [input, setInput] = useState("");
-    const [isBotTyping, setIsBotTyping] = useState(false);
-    const [uploadedFiles, setUploadedFiles] = useState([]);
-    const [showModal, setShowModal] = useState(false);
-    const [backToTop, setBackToTop] = useState(false);
-    const [popularQuestions, setPopularQuestions] = useState([
-        { text: "What’s 7QC?" },
-        { text: "Quality upscale?" },
-        { text: "What’s Six Sigma?" },
-        { text: "What can you do?" },
-    ]);
-
-    const chatEndRef = useRef(null);
-    const chatBodyRef = useRef(null);
-
-    const scrollToBottom = () => {
+      ]);
+      
+      const [input, setInput] = useState("");
+      const [isBotTyping, setIsBotTyping] = useState(false);
+      const [uploadedFiles, setUploadedFiles] = useState([]);
+      const [showModal, setShowModal] = useState(false);
+      const [backToTop, setBackToTop] = useState(false);
+      
+      const chatEndRef = useRef(null);
+      const chatBodyRef = useRef(null);
+      
+      useEffect(() => {
+        scrollToBottom();
+      }, [messages, isBotTyping]);
+      
+      const scrollToBottom = () => {
         chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    };
-
-    const scrollToTop = () => {
+      };
+      
+      const scrollToTop = () => {
         chatBodyRef.current?.scrollTo({ top: 0, behavior: "smooth" });
-    };
-
-    const handleScrollToggle = () => {
+      };
+      
+      const handleScrollToggle = () => {
         const el = chatBodyRef.current;
         if (!el) return;
-
+      
         if (el.scrollTop + el.clientHeight >= el.scrollHeight - 10) {
-            scrollToTop();
-            setBackToTop(true);
+          scrollToTop();
+          setBackToTop(true);
         } else if (el.scrollTop <= 10) {
-            scrollToBottom();
-            setBackToTop(false);
+          scrollToBottom();
+          setBackToTop(false);
         } else {
-            backToTop ? scrollToBottom() : scrollToTop();
-            setBackToTop(!backToTop);
+          backToTop ? scrollToBottom() : scrollToTop();
+          setBackToTop(!backToTop);
         }
-    };
-
-    useEffect(() => {
-        scrollToBottom();
-    }, [messages, isBotTyping]);
-
-    const handleFileUpload = async (e) => {
+      };
+      
+      const handleFileUpload = async (e) => {
         const files = Array.from(e.target.files);
         if (!files.length) return;
-
-        const fileObjs = files.map((file) => ({ name: file.name, progress: 0, status: "uploading" }));
+      
+        const fileObjs = files.map((file) => ({
+          name: file.name,
+          progress: 0,
+          status: "uploading",
+        }));
         setUploadedFiles((prev) => [...prev, ...fileObjs]);
-
+      
         files.forEach((file, i) => {
-            const currentIndex = uploadedFiles.length + i;
-            const formData = new FormData();
-            formData.append("file", file);
-
-            axios.post("http://localhost:8000/upload", formData, {
-                headers: { "Content-Type": "multipart/form-data" },
-                onUploadProgress: (progressEvent) => {
-                    const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-                    setUploadedFiles((prev) =>
-                        prev.map((f, idx) => (idx === currentIndex ? { ...f, progress: percent } : f))
-                    );
-                },
+          const currentIndex = uploadedFiles.length + i;
+          const formData = new FormData();
+          formData.append("file", file);
+      
+          axios
+            .post("http://localhost:8000/upload", formData, {
+              headers: { "Content-Type": "multipart/form-data" },
+              onUploadProgress: (progressEvent) => {
+                const percent = Math.round(
+                  (progressEvent.loaded * 100) / progressEvent.total
+                );
+                setUploadedFiles((prev) =>
+                  prev.map((f, idx) =>
+                    idx === currentIndex ? { ...f, progress: percent } : f
+                  )
+                );
+              },
             })
-                .then((res) => {
-                    const data = res.data;
-                    setUploadedFiles((prev) =>
-                        prev.map((f, idx) => (idx === currentIndex ? { ...f, progress: 100, status: "done" } : f))
-                    );
-                    setMessages((prev) => [
-                        ...prev,
-                        { from: "bot", text: `📄 ${data.filename} uploaded and ready for questions.` },
-                    ]);
-                })
-                .catch((err) => {
-                    console.error("Upload failed:", err);
-                    setUploadedFiles((prev) =>
-                        prev.map((f, idx) => (idx === currentIndex ? { ...f, status: "error" } : f))
-                    );
-                    setMessages((prev) => [
-                        ...prev,
-                        { from: "bot", text: `❌ Upload failed for ${file.name}` },
-                    ]);
-                });
+            .then((res) => {
+              const data = res.data;
+              setUploadedFiles((prev) =>
+                prev.map((f, idx) =>
+                  idx === currentIndex
+                    ? { ...f, progress: 100, status: "done" }
+                    : f
+                )
+              );
+              setMessages((prev) => [
+                ...prev,
+                {
+                  from: "bot",
+                  text: `📄 ${data.filename} uploaded and ready for questions.`,
+                },
+              ]);
+            })
+            .catch((err) => {
+              console.error("Upload failed:", err);
+              setUploadedFiles((prev) =>
+                prev.map((f, idx) =>
+                  idx === currentIndex ? { ...f, status: "error" } : f
+                )
+              );
+              setMessages((prev) => [
+                ...prev,
+                {
+                  from: "bot",
+                  text: `❌ Upload failed for ${file.name}`,
+                },
+              ]);
+            });
         });
-    };
-
-    const sendMessage = async (msg = input) => {
+      };
+      
+      const sendMessage = async (msg = input) => {
         if (!msg.trim()) return;
         setMessages((prev) => [...prev, { from: "user", text: msg }]);
         setInput("");
         setIsBotTyping(true);
-
+      
         const formData = new FormData();
         formData.append("query", msg);
         formData.append("user_id", getUserId());
         if (uploadedFiles.length) {
-            formData.append("file_name", uploadedFiles[uploadedFiles.length - 1].name);
+            uploadedFiles.forEach(file => {
+                formData.append("file_name", file.name);  // multiple values for the same key
+              });  
         }
-
+      
         try {
-            const res = await fetch("http://localhost:8000/query", {
-                method: "POST",
-                body: formData,
-            });
-
-            const data = await res.json();
-            const botResponse =
-                data.result || data.error || "⚠️ AI didn’t reply. Check backend logs.";
-            setMessages((prev) => [...prev, { from: "bot", text: botResponse }]);
-
-            // ✅ Update popular questions
-            if (data.suggested_questions && Array.isArray(data.suggested_questions)) {
-                setPopularQuestions(data.suggested_questions.map((q) => ({ text: q })));
-            }
+          const res = await fetch("http://localhost:8000/query", {
+            method: "POST",
+            body: formData,
+          });
+      
+          const data = await res.json();
+          const botResponse =
+            data.result || data.error || "⚠️ AI didn’t reply. Check backend logs.";
+      
+          const suggested = Array.isArray(data.suggested_questions)
+            ? data.suggested_questions.map((q) => ({ text: q }))
+            : [];
+      
+          setMessages((prev) => [
+            ...prev,
+            {
+              from: "bot",
+              text: botResponse,
+              relatedQuestions: suggested,
+            },
+          ]);
         } catch (err) {
-            console.error("Fetch failed:", err);
-            setMessages((prev) => [
-                ...prev,
-                { from: "bot", text: `You asked: "${msg}"
-
-🚫 Server is unreachable.` },
-            ]);
+          console.error("Fetch failed:", err);
+          setMessages((prev) => [
+            ...prev,
+            {
+              from: "bot",
+              text: `You asked: "${msg}"\n\n🚫 Server is unreachable.`,
+            },
+          ]);
         } finally {
-            setIsBotTyping(false);
+          setIsBotTyping(false);
         }
-    };
-
-    const renderBotMessage = (msg, idx) => (
+      };
+      
+      const renderBotMessage = (msg, idx) => (
         <div key={idx} className="chat-message bot">
-          <div dangerouslySetInnerHTML={{ __html: msg.text.replace(/\n/g, "<br />") }} />
-          {popularQuestions.length > 0 && (
-            <div className="popular-questions">
-              <h3>Related Questions:</h3>
-              <div className="question-buttons">
-                {popularQuestions.map((q, i) => (
-                  <button key={i} onClick={() => sendMessage(q.text)}>
-                    {q.text}
-                  </button>
-                ))}
+          <div
+            dangerouslySetInnerHTML={{
+              __html: msg.text.replace(/\n/g, "<br />"),
+            }}
+          />
+          {Array.isArray(msg.relatedQuestions) &&
+            msg.relatedQuestions.length > 0 && (
+              <div className="popular-questions">
+                <h3>Related Questions:</h3>
+                <div className="question-buttons">
+                  {msg.relatedQuestions.map((q, i) => (
+                    <button key={i} onClick={() => sendMessage(q.text)}>
+                      {q.text}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
         </div>
       );
+      
       
 
     return (
@@ -243,7 +281,7 @@ export default function App() {
                             className="modal-close-btn"
                             onClick={() => setShowModal(false)}
                         >
-                            &times;
+                            <i className="fa-solid fa-xmark"></i>
                         </button>
 
                     <div className={`modal-content-wrapper ${ uploadedFiles.length === 0 ? 'compact-modal' : '' }`}>
