@@ -7,6 +7,9 @@ from uuid import uuid4
 import os
 import json
 import requests
+import re
+import ast
+
 from utils.embed_store import embed_and_store, query_vector_store
 from utils.extract_text import extract_text
 load_dotenv()
@@ -93,17 +96,13 @@ async def upload_file(file: UploadFile = File(...)):
 
 @app.post("/query")
 async def query_document(query: str = Form(...), file_name: str = Form(None), user_id: str = Form(None)):
-    # Validate inputs
     if not query or not query.strip():
         raise HTTPException(status_code=400, detail="Query cannot be empty")
-    
+
     print(f">> Received query: '{query}' for file: '{file_name}'")
-    
-    # If no file is specified, use a default context or handle gracefully
-    if not file_name:
-        print(">> No file specified, using default context")
-        context = "No specific document context available."
-    else:
+
+    context = "No specific document context available."
+    if file_name:
         try:
             context = query_vector_store(query, file_name)
         except Exception as e:
@@ -117,7 +116,7 @@ async def query_document(query: str = Form(...), file_name: str = Form(None), us
     else:
         system_prompt = "You are a helpful assistant specializing in quality management and process improvement."
 
-    user_prompt = f"""Use the following context to answer naturally and clearly.
+    user_prompt = f"""Use the following context to answer clearly.
 
 Context:
 {context}
@@ -127,12 +126,33 @@ Question:
 
 Answer:"""
 
+    suggestion_prompt = f"Based on the topic and user's interest, give 4 short follow-up questions max of 2 or 3 words each related to: {query}. Only return them as a plain list of text questions without numbering."
+
     try:
         api_key = os.getenv("OPENROUTER_API_KEY")
         if not api_key:
             return {"error": "Missing API key."}
 
-        response = requests.post(
+        payload = {
+            "model": "mistralai/mistral-7b-instruct",
+            "messages": [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt}
+            ],
+            "max_tokens": 300,
+            "temperature": 0.7
+        }
+
+        response_main = requests.post(
+            "https://openrouter.ai/api/v1/chat/completions",
+            headers={
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json"
+            },
+            json=payload
+        )
+
+        suggestion_response = requests.post(
             "https://openrouter.ai/api/v1/chat/completions",
             headers={
                 "Authorization": f"Bearer {api_key}",
@@ -141,40 +161,43 @@ Answer:"""
             json={
                 "model": "mistralai/mistral-7b-instruct",
                 "messages": [
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_prompt}
+                    {"role": "user", "content": suggestion_prompt}
                 ],
-                "max_tokens": 300,
+                "max_tokens": 50,
                 "temperature": 0.7
             }
         )
 
-        print(">> OpenRouter response code:", response.status_code)
-        print(">> OpenRouter response body:", response.text) ##for reference guyssss
-
-        if response.status_code == 200:
-            data = response.json()
-            choices = data.get("choices", [])
-            if choices and "message" in choices[0]:
-                ai_reply = choices[0]["message"]["content"]
-                if user_id:
-                    save_to_history(user_id, "user", query)
-                    save_to_history(user_id, "bot", ai_reply)
-                return {"result": ai_reply}
-            else:
-                return {"error": "Empty or malformed response from model.", "raw": data}
+        ai_reply = ""
+        if response_main.status_code == 200:
+            data = response_main.json()
+            ai_reply = data["choices"][0]["message"]["content"]
+            if user_id:
+                save_to_history(user_id, "user", query)
+                save_to_history(user_id, "bot", ai_reply)
         else:
-            return {
-                "error": "AI request failed",
-                "status": response.status_code,
-                "body": response.text
-            }
+            return {"error": "Main AI request failed", "body": response_main.text}
+
+        suggestions = []
+        if suggestion_response.status_code == 200:
+            raw = suggestion_response.json()["choices"][0]["message"]["content"]
+            suggestions = [
+                re.sub(r'^[\"\“\‘\']?\d*\.\s*(.+?)[\"\”\’\']?$', r'\1', line.strip())[1:]
+                for line in raw.strip().splitlines()
+                if line.strip()
+            ]
+
+            ai_reply = re.sub(r'(?<!")(\d+)\.\s+', r'\n\1. ', ai_reply)
+
+        return {
+            "result": ai_reply,
+            "suggested_questions": suggestions
+        }
 
     except Exception as e:
         print(f">> Exception during AI call: {e}")
         raise HTTPException(status_code=500, detail=f"AI service error: {str(e)}")
-
-
+    
 @app.post("/query-json")
 async def query_document_json(request: QueryRequest):
     """Alternative JSON endpoint for queries"""
