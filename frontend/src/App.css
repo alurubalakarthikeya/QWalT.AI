@@ -556,6 +556,10 @@ body {
         margin: 16px; 
     }
 
+    .modal-close-btn i {
+        font-size: 10px;
+    }
+
     .upload-img{
         opacity: 0.35;
         height: 130px;
