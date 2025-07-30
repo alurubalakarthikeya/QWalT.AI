@@ -350,7 +350,7 @@ export default function App() {
           <p>Install QWalT.AI App now for a better experience!</p>
           <img className="log-img" src={logo} alt="img" />
           </div>
-          <button onClick={handleInstallClick}>Install</button>
+          <button className="mode" onClick={handleInstallClick}>Install</button>
         </div>
       )}
     </div>
