@@ -458,6 +458,16 @@ body {
     box-shadow: 0 6px 20px rgba(56, 189, 248, 0.2);
 }
 
+.modal-content-wrapper.compact-modal {
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+}
+
+.modal-content-wrapper.compact-modal .drop-zone {
+    width: 100%;
+}
+
 /* === File List === */
 .file-list {
     flex: 1.2;
