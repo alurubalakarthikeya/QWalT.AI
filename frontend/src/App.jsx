@@ -7,7 +7,7 @@ import uploadImg from "./assets/download.png";
 import ReactMarkdown from "react-markdown";
 
 // API Base URL - uses environment variable in production, localhost in development
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+const API_BASE_URL = 'https://backend-trail-06b6.onrender.com';
 
 export default function App() {
     const [messages, setMessages] = useState([

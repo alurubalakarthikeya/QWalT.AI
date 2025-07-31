@@ -92,6 +92,10 @@ os.makedirs(PROMPT_DIR, exist_ok=True)
 def process_and_store(file_path, file_name):
     text = extract_text(file_path)
     embed_and_store(text, file_name)
+    
+@app.get("/")
+def read_root():
+    return {"message": "Backend is running"}
 
 @app.post("/chat/")
 async def chat(request: Request):
