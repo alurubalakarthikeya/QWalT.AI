@@ -36,11 +36,9 @@ body {
     top: 0;
     left: 0;
     width: 100%;
-    background: linear-gradient(
-        to right,
-        rgba(14, 165, 233, 0.5),
+    background: 
         rgba(59, 130, 246, 0.5)
-    );
+    ;
     color: white;
     padding: 18px 24px;
     display: flex;
@@ -61,7 +59,8 @@ body {
     letter-spacing: 1px;
     color: #e2e8f0;
 }
-.mode {
+
+.chat-header .mode {
     background: rgba(14, 165, 233, 0.2);
     font-family: "TikTok Sans", sans-serif;
     color: #e2e8f0;
@@ -73,7 +72,7 @@ body {
     transition: background-color 0.3s ease;
 }
 
-.mode:hover {
+.chat-header .mode:hover {
     background: rgba(56, 189, 248, 0.3);
 }
 
@@ -566,7 +565,7 @@ body {
     }
 
     .chat-message {
-        max-width: 85%;
+        max-width: 97%;
     }
 
     .modal-content-wrapper {
@@ -600,12 +599,6 @@ body {
         height: 30px;
         font-size: 18px;
     }
-    
-    .install-banner{
-        min-width: 85%;
-        padding: 16px;
-        gap: 12px;
-    }
 }
 
 /* === End of Modal Styles === */
@@ -621,13 +614,6 @@ body {
     .chat-body .chat-message:last-child {
         margin-bottom: 100px;
     }
-
-    .log-img {
-        width: 137px;
-        height: 130px;
-        object-fit: cover;
-        margin-bottom: 16px;
-      }
 }
 
 @media (max-width: 480px) {
@@ -676,19 +662,6 @@ body {
         width: 200px;
         opacity: 0.35;
     }
-
-    .install-banner{
-        min-width: 45%;
-        padding: 16px;
-        gap: 12px;
-    }
-
-    .log-img {
-        width: 220px;
-        height: 220px;
-        object-fit: cover;
-        margin-bottom: 16px;
-      }
 }
 
 .scroll-toggle-btn {
@@ -717,44 +690,3 @@ body {
     background: rgba(14, 165, 233, 0.35);
   }
 
-  .install-banner {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: linear-gradient(
-      to right,
-      rgba(14, 165, 233, 0.5),
-      rgba(59, 130, 246, 0.5)
-    );
-    color: white;
-    padding: 18px 24px;
-    display: flex;
-    justify-content: space-between;
-    flex-direction: column;
-    align-items: center;
-    border-radius: 20px;
-    border: 1.3px solid rgba(56, 189, 248, 0.4);
-    z-index: 99999;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-    gap: 16px;
-    max-width: 90%;
-  }
-  
-  .install-banner p {
-    margin: 0;
-    font-size: 1.1rem;
-    font-weight: 500;
-  }
-
-  .full{
-    width: 100%;
-  }
-
-  .install-icon{
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
