@@ -1,0 +1,37 @@
+QWalT-AI/
+├── backend/                            # 🧠 FastAPI backend
+│   │   ├── main.py                     # FastAPI entry point
+│   │   ├── documents/                   # Business logic (PDF parsing, QA analysis, etc.)
+│   │   ├── vector_db/
+│   │   ├── utils/                      # Utility functions
+│   ├── requirements.txt               # Backend dependencies
+│   ├── .env                           # Env vars (OpenAI key, etc.)
+│   └── uvicorn.sh                     # Run script (e.g., uvicorn app.main:app --reload)
+│
+├── frontend/                           # 💻 React Vite frontend (your current setup)
+│   ├── public/
+│   │   ├── web-app-manifest-192x192.png
+│   │   ├── web-app-manifest-512x512.png
+│   │   ├── favicon.ico
+│   │   ├── apple-touch-icon.png
+│   │   └── robots.txt
+│   ├── src/
+│   │   ├── App.jsx                    # Main component (PWA logic here)
+│   │   ├── main.jsx                   # React entry point
+│   │   ├── api/                       # Axios configs, API helpers
+│   │   ├── components/                # Reusable UI components
+│   │   ├── pages/                     # Home, Chat, Upload, etc.
+│   │   └── assets/
+│   ├── index.html
+│   ├── vite.config.js                # Includes vite-plugin-pwa
+│   ├── package.json
+│   └── README.md
+│
+├── dist/                              # 🔧 Production build output from frontend
+│   ├── index.html
+│   ├── manifest.webmanifest
+│   ├── service-worker.js
+│   └── assets/
+│
+├── .gitignore
+└── README.md                         # Project overview
