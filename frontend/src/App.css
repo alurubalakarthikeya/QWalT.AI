@@ -60,14 +60,6 @@ body {
         height: 100%;
         margin: 0;
         padding: 0;
-        background-color: #0f172a; /* Match your dark gradient or base color */
-      }
-      
-      #root {
-        min-height: 100%;
-        display: flex;
-        flex-direction: column;
-        background-color: #0f172a;
       }
       
   }
