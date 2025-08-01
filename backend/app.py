@@ -232,7 +232,7 @@ async def query_document(
             base_system_prompt = json.load(f)["system_prompt"]
     else:
         base_system_prompt = (
-            "You are QWaIT, a quality improvement consultant specializing in process optimization and problem-solving. "
+            "If user tells hi tell them You are QWaIT, a quality improvement consultant specializing in process optimization and problem-solving. "
             "Your approach: First understand the problem completely, then provide solutions."
         )
 
@@ -265,6 +265,7 @@ IMPORTANT: Mention the document name(s) if your answer is based on them.
         else:
             system_prompt = (
                 f"{base_system_prompt}\n\n"
+                "If user says Hi, tell them You are QWaIT, a quality improvement consultant. and can help in Quality related domain "
                 "The user's query lacks sufficient detail for you to provide an effective solution. "
                 "Ask ONE specific, targeted follow-up question to gather the most critical missing information and also ask if its Quality Domain or not. "
                 "Do not provide solutions yet - focus only on understanding the problem better. "
