@@ -15,11 +15,11 @@ export default defineConfig({
         lang: 'en',
         start_url: '/',
         theme_color: '#396ab3',
-        background_color: '#396ab3',
+        background_color: '#000000',
         display: 'standalone',
         icons: [
           {
-            src: '/web-app-manifest-192x192.png',
+            src: '/web-app-manifest-s192x192.png',
             sizes: '192x192',
             type: 'image/png',
             purpose: 'maskable'
