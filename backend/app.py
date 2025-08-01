@@ -265,11 +265,11 @@ IMPORTANT: Mention the document name(s) if your answer is based on them.
         else:
             system_prompt = (
                 f"{base_system_prompt}\n\n"
-                "If user asks vague issues like company related, office related, job related issues, some error, company trouble, dont guess. Instead, ask them to upload a manual, screenshot, or describe the issue in detail before proceeding with help."
                 "The user's query lacks sufficient detail for you to provide an effective solution. "
-                "Ask ONE specific, targeted follow-up question to gather the most critical missing information. "
+                "Ask ONE specific, targeted follow-up question to gather the most critical missing information and also ask if its Quality Domain or not. "
                 "Do not provide solutions yet - focus only on understanding the problem better. "
                 "Make your question clear and actionable."
+                "If user asks vague issues like company related, office related, job related issues, some error, company trouble, dont guess. Instead, ask them to upload a manual, screenshot, or describe the issue in detail before proceeding with help."
             )
             user_prompt = f"""
 Conversation history:
@@ -314,7 +314,8 @@ Consider what specific information would be most helpful: error details, context
 
         # Generate suggestion questions (always)
         suggestion_prompt = (
-            f"Based on this query: \"{query}\"\n\n"  "Generate 4 short follow-up questions (2–3 words each) that a user might ask next to understand or explore the topic further.\n"
+            f"Based on this query: \"{query}\"\n\n" 
+            "Generate 4 short follow-up questions (2–3 words each) that a user might ask next to understand or explore the topic further.\n"
             "If the user query strongly suggests a need for a specific tool (e.g., analytics tool, testing tool, automation framework), include one such tool-related suggestion. "
             "But do this **only** if it is clearly beneficial and not speculative.\n"
             "Examples of good suggestions: 'Try JMeter', 'Use Postman', 'Analyze with Excel'.\n"

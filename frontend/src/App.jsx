@@ -214,6 +214,70 @@ export default function App() {
           )}
         </div>
       );
+
+      const [deferredPrompt, setDeferredPrompt] = useState(null);
+      const [showInstallBtn, setShowInstallBtn] = useState(false);
+      const [botResponseCount, setBotResponseCount] = useState(0);
+      const [queryCooldown, setQueryCooldown] = useState(
+        parseInt(localStorage.getItem("queryCooldown")) || 0
+      );
+      
+      useEffect(() => {
+        const handler = (e) => {
+          e.preventDefault();
+          setDeferredPrompt(e);
+        };
+        window.addEventListener("beforeinstallprompt", handler);
+        return () => window.removeEventListener("beforeinstallprompt", handler);
+      }, []);
+      
+      useEffect(() => {
+        if (
+          botResponseCount >= 3 &&
+          queryCooldown === 0 &&
+          deferredPrompt &&
+          localStorage.getItem("installBannerDismissed") !== "true"
+        ) {
+          setShowInstallBtn(true);
+        }
+      }, [botResponseCount, queryCooldown, deferredPrompt]);
+      
+      const handleInstallClick = () => {
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          deferredPrompt.userChoice.then((choiceResult) => {
+            if (choiceResult.outcome === "accepted") {
+              console.log("User accepted the install prompt");
+            } else {
+              console.log("User dismissed the install prompt");
+            }
+            setDeferredPrompt(null);
+            setShowInstallBtn(false);
+            localStorage.setItem("queryCooldown", "10");
+            setQueryCooldown(10);
+          });
+        }
+      };
+      
+      const handleCloseBanner = () => {
+        setShowInstallBtn(false);
+        localStorage.setItem("installBannerDismissed", "true");
+        localStorage.setItem("queryCooldown", "10");
+        setQueryCooldown(10);
+      };
+      
+      const handleSuccessfulUserQuery = () => {
+        if (queryCooldown > 0) {
+          const updated = queryCooldown - 1;
+          localStorage.setItem("queryCooldown", updated.toString());
+          setQueryCooldown(updated);
+        }
+      };
+      
+      const handleBotResponse = () => {
+        setBotResponseCount((prev) => prev + 1);
+      };
+            
       
       
       
@@ -345,6 +409,19 @@ export default function App() {
                     </div>
                 </div>
             )}
-        </div>
+         {showInstallBtn && (
+              <>
+                <div className="blur-backdrop" />
+                <div className="install-banner">
+                  <button className="modal-close-btn" onClick={handleCloseBanner}>✕</button>
+                  <div className="install-icon">
+                    <img className="log-img" src={logo} alt="img" />
+                    <p>Install QWalT.AI App now for a better experience!</p>
+                  </div>
+                  <button className="mode full" onClick={handleInstallClick}>Install</button>
+                </div>
+              </>
+            )}
+       </div>
     );
 }
