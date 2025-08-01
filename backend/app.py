@@ -10,7 +10,6 @@ import json
 import requests
 import re
 
-# Use ultra-lightweight embedding store
 from utils.embed_store import embed_and_store, query_vector_store
 from utils.extract_text import extract_text
 
@@ -313,7 +312,6 @@ Consider what specific information would be most helpful: error details, context
         else:
             return {"error": "Main AI request failed", "body": response_main.text}
 
-        # Generate suggestion questions (always)
         suggestion_prompt = (
             f"Based on this query: \"{query}\"\n\n" 
             "Generate 4 short follow-up questions (2–3 words each) that a user might ask next to understand or explore the topic further.\n"

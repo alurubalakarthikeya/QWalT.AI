@@ -14,7 +14,7 @@ export default defineConfig({
         description: 'Your AI-powered assistant for QWALITY improvement',
         lang: 'en',
         start_url: '/',
-        theme_color: '#2c628f',
+        theme_color: '#396ab3',
         background_color: '#182235',
         display: 'standalone',
         icons: [
