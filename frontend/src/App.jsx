@@ -308,13 +308,19 @@ export default function App() {
             </div>
           )
         )}
-        {isBotTyping && (
-          <div className="chat-message bot typing-indicator">
-            <div className="typing-dot"></div>
-            <div className="typing-dot"></div>
-            <div className="typing-dot"></div>
+       {isBotTyping && (
+         <div className="chat-message bot typing-indicator">
+           <p style={{ fontStyle: 'italic', fontSize: '0.85rem', marginTop: '0.5rem', color: '#888' }}>
+             QWalT is thinking...
+           </p>
+          <div className="typing-indicator-dots">
+           <div className="typing-dot"></div>
+           <div className="typing-dot"></div>
+           <div className="typing-dot"></div>
           </div>
-        )}
+         </div>
+       )}
+
         <div ref={chatEndRef} />
       </div>
 
