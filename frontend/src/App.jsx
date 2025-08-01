@@ -285,7 +285,7 @@ export default function App() {
           <button className="mode">Friendly</button>
         ) : (
           <button className="mode" onClick={handleInstallClick}>
-            Install <i className="fa-solid fa-download"></i>
+            Install
           </button>
         )}
       </div>
