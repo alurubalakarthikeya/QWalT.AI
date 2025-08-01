@@ -53,7 +53,7 @@ body {
 
 @media all and (display-mode: standalone) {
     .chat-header {
-      padding-top: 0 !important;
+      padding-top: 5px !important;
     } 
   }
   
