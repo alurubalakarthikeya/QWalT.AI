@@ -36,11 +36,9 @@ body {
     top: 0;
     left: 0;
     width: 100%;
-    background: linear-gradient(
-        to right,
-        rgba(14, 165, 233, 0.5),
+    background: 
         rgba(59, 130, 246, 0.5)
-    );
+    ;
     color: white;
     padding: 18px 24px;
     display: flex;
@@ -61,7 +59,8 @@ body {
     letter-spacing: 1px;
     color: #e2e8f0;
 }
-.mode {
+
+.chat-header .mode {
     background: rgba(14, 165, 233, 0.2);
     font-family: "TikTok Sans", sans-serif;
     color: #e2e8f0;
@@ -73,7 +72,7 @@ body {
     transition: background-color 0.3s ease;
 }
 
-.mode:hover {
+.chat-header .mode:hover {
     background: rgba(56, 189, 248, 0.3);
 }
 
@@ -566,7 +565,7 @@ body {
     }
 
     .chat-message {
-        max-width: 85%;
+        max-width: 97%;
     }
 
     .modal-content-wrapper {
@@ -600,7 +599,20 @@ body {
         height: 30px;
         font-size: 18px;
     }
-    
+
+    .install-banner{
+        min-width: 20%;
+        padding: 16px;
+        gap: 12px;
+    }
+
+    .log-img {
+        width: 137px;
+        height: 130px;
+        object-fit: cover;
+        margin-bottom: 16px;
+    }
+
     .install-banner{
         min-width: 85%;
         padding: 16px;
@@ -621,13 +633,6 @@ body {
     .chat-body .chat-message:last-child {
         margin-bottom: 100px;
     }
-
-    .log-img {
-        width: 137px;
-        height: 130px;
-        object-fit: cover;
-        margin-bottom: 16px;
-      }
 }
 
 @media (max-width: 480px) {
@@ -677,12 +682,6 @@ body {
         opacity: 0.35;
     }
 
-    .install-banner{
-        min-width: 45%;
-        padding: 16px;
-        gap: 12px;
-    }
-
     .log-img {
         width: 220px;
         height: 220px;
@@ -715,6 +714,17 @@ body {
   
   .scroll-toggle-btn:hover {
     background: rgba(14, 165, 233, 0.35);
+  }
+
+  .blur-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 99998;
   }
 
   .install-banner {
@@ -758,3 +768,4 @@ body {
     align-items: center;
     justify-content: space-between;
   }
+  

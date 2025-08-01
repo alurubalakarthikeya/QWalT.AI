@@ -1,0 +1,10 @@
+[
+  {
+    "role": "user",
+    "message": "hi"
+  },
+  {
+    "role": "bot",
+    "message": "To help me provide a more effective solution, could you please describe the specific issue or challenge you're currently facing that requires process optimization or problem-solving? This could include details such as the context, the nature of the problem, any error messages, the impact on your work, or any steps you've already taken to address it. This will help me understand your situation better and offer targeted advice."
+  }
+]
