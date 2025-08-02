@@ -29,8 +29,8 @@
 ### 1. Clone the repo
 
 ```bash
-git clone https://github.com/your-username/QWalT.git
-cd QWalT
+git clone https://github.com/your-username/KneadQuality-AI.git
+cd KneadQuality-AI
 ```
 
 ### 2. Create .env file with
