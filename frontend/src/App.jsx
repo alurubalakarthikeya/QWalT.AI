@@ -281,12 +281,12 @@ export default function App() {
         <h1 className="title">
           <i className="fa-solid fa-robot"></i> QWalT
         </h1>
-        {isInstalled || (!deferredPrompt && !showInstallBtn) ? (
-          <button className="mode">Friendly</button>
-        ) : (
+        {showInstallBtn && !isInstalled ? (
           <button className="mode" onClick={handleInstallClick}>
             Install
           </button>
+        ) : (
+          <button className="mode">Friendly</button>
         )}
       </div>
 
