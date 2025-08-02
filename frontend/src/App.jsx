@@ -4,7 +4,7 @@ import "./App.css";
 import { getUserId } from './utils';
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import uploadImg from "./assets/download.png";
-import logo from "./assets/logo.png"; // Make sure logo is imported
+import logo from "./assets/logo.png";
 import ReactMarkdown from "react-markdown";
 
 const API_BASE_URL = 'https://backend-trail-06b6.onrender.com';
@@ -21,11 +21,8 @@ export default function App() {
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [backToTop, setBackToTop] = useState(false);
-
   const [deferredPrompt, setDeferredPrompt] = useState(null);
-  const [showInstallBtn, setShowInstallBtn] = useState(false);
-  const [botResponseCount, setBotResponseCount] = useState(0);
-  const [queryCooldown, setQueryCooldown] = useState(0);
+  const [showInstallPrompt, setShowInstallPrompt] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
 
   const chatEndRef = useRef(null);
@@ -36,44 +33,20 @@ export default function App() {
   }, [messages, isBotTyping]);
 
   useEffect(() => {
-    const cooldown = parseInt(localStorage.getItem("queryCooldown")) || 0;
-    setQueryCooldown(cooldown);
+    const installed = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+    setIsInstalled(installed);
 
-    if (
-      window.matchMedia('(display-mode: standalone)').matches ||
-      window.navigator.standalone === true
-    ) {
-      setIsInstalled(true);
-    }
-
-    window.addEventListener('appinstalled', () => {
-      setIsInstalled(true);
-    });
+    window.addEventListener('appinstalled', () => setIsInstalled(true));
 
     const handler = (e) => {
       e.preventDefault();
       setDeferredPrompt(e);
+      setShowInstallPrompt(true);
     };
-    window.addEventListener("beforeinstallprompt", handler);
 
+    window.addEventListener("beforeinstallprompt", handler);
     return () => window.removeEventListener("beforeinstallprompt", handler);
   }, []);
-
-  useEffect(() => {
-    localStorage.setItem("queryCooldown", queryCooldown.toString());
-  }, [queryCooldown]);
-
-  useEffect(() => {
-    const dismissed = localStorage.getItem("installBannerDismissed") === "true";
-    if (
-      botResponseCount >= 3 &&
-      queryCooldown === 0 &&
-      deferredPrompt &&
-      !dismissed
-    ) {
-      setShowInstallBtn(true);
-    }
-  }, [botResponseCount, queryCooldown, deferredPrompt]);
 
   const scrollToBottom = () => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -108,18 +81,9 @@ export default function App() {
           console.log("User dismissed the install prompt");
         }
         setDeferredPrompt(null);
-        setShowInstallBtn(false);
-        setQueryCooldown(10);
-        localStorage.setItem("queryCooldown", "10");
+        setShowInstallPrompt(false);
       });
     }
-  };
-
-  const handleCloseBanner = () => {
-    setShowInstallBtn(false);
-    localStorage.setItem("installBannerDismissed", "true");
-    setQueryCooldown(10);
-    localStorage.setItem("queryCooldown", "10");
   };
 
   const handleFileUpload = async (e) => {
@@ -151,12 +115,6 @@ export default function App() {
       })
       .then((res) => {
         const data = res.data;
-        setUploadedFiles((prev) =>
-          prev.map((f, idx) =>
-            idx === currentIndex ? { ...f, progress: 100, status: "done" } : f
-          )
-        );
-
         const suggested = Array.isArray(data.suggested_questions)
           ? data.suggested_questions.map((q) => ({ text: q }))
           : [];
@@ -169,6 +127,11 @@ export default function App() {
             relatedQuestions: suggested,
           },
         ]);
+        setUploadedFiles((prev) =>
+          prev.map((f, idx) =>
+            idx === currentIndex ? { ...f, progress: 100, status: "done" } : f
+          )
+        );
       })
       .catch((err) => {
         console.error("Upload failed:", err);
@@ -228,9 +191,6 @@ export default function App() {
         },
       ]);
 
-      setBotResponseCount((prev) => prev + 1);
-      if (queryCooldown > 0) setQueryCooldown(queryCooldown - 1);
-
     } catch (err) {
       console.error("Fetch failed:", err);
       setMessages((prev) => [
@@ -281,13 +241,9 @@ export default function App() {
         <h1 className="title">
           <i className="fa-solid fa-robot"></i> QWalT
         </h1>
-        {showInstallBtn && !isInstalled ? (
-          <button className="mode" onClick={handleInstallClick}>
-            Install
-          </button>
-        ) : (
-          <button className="mode">Friendly</button>
-        )}
+        <button className="mode" onClick={handleInstallClick} disabled={isInstalled || !deferredPrompt}>
+          {isInstalled ? "Friendly" : "Install"}
+        </button>
       </div>
 
       <button
@@ -308,19 +264,18 @@ export default function App() {
             </div>
           )
         )}
-       {isBotTyping && (
-         <div className="chat-message bot typing-indicator">
-           <p style={{ fontStyle: 'italic', fontSize: '0.85rem', marginTop: '0.5rem', color: '#ffffff' }}>
-             QWalT is thinking...
-           </p>
-          <div className="typing-indicator-dots">
-           <div className="typing-dot"></div>
-           <div className="typing-dot"></div>
-           <div className="typing-dot"></div>
+        {isBotTyping && (
+          <div className="chat-message bot typing-indicator">
+            <p style={{ fontStyle: 'italic', fontSize: '0.85rem', marginTop: '0.5rem', color: '#ffffff' }}>
+              QWalT is thinking...
+            </p>
+            <div className="typing-indicator-dots">
+              <div className="typing-dot"></div>
+              <div className="typing-dot"></div>
+              <div className="typing-dot"></div>
+            </div>
           </div>
-         </div>
-       )}
-
+        )}
         <div ref={chatEndRef} />
       </div>
 
@@ -343,24 +298,6 @@ export default function App() {
         </button>
         <button onClick={() => sendMessage()}>Send</button>
       </div>
-
-      {showInstallBtn && (
-        <>
-          <div className="blur-backdrop" onClick={handleCloseBanner}></div>
-          <div className="install-banner">
-            <button className="modal-close-btn" onClick={handleCloseBanner}>✕</button>
-            <div className="install-content">
-              <div className="install-icon">
-                <img className="log-img" src={logo} alt="QWalT.AI Logo" />
-              </div>
-              <div className="install-text">
-                <p>Install <strong>QWalT.AI</strong> App now for a better experience!</p>
-                <button className="mode full" onClick={handleInstallClick}>Install</button>
-              </div>
-            </div>
-          </div>
-        </>
-      )}
 
       {showModal && (
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
@@ -422,3 +359,4 @@ export default function App() {
     </div>
   );
 }
+
