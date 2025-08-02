@@ -310,7 +310,7 @@ export default function App() {
         )}
        {isBotTyping && (
          <div className="chat-message bot typing-indicator">
-           <p style={{ fontStyle: 'italic', fontSize: '0.85rem', marginTop: '0.5rem', color: '#888' }}>
+           <p style={{ fontStyle: 'italic', fontSize: '0.85rem', marginTop: '0.5rem', color: '#ffffff' }}>
              QWalT is thinking...
            </p>
           <div className="typing-indicator-dots">
