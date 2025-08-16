@@ -10,7 +10,6 @@ import json
 import requests
 import re
 
-# Use ultra-lightweight embedding store
 from utils.embed_store import embed_and_store, query_vector_store
 from utils.extract_text import extract_text
 
@@ -232,7 +231,7 @@ async def query_document(
             base_system_prompt = json.load(f)["system_prompt"]
     else:
         base_system_prompt = (
-            "If user tells hi or asks what you can do tell them You are QWaIT, a quality improvement consultant specializing in process optimization and problem-solving. "
+            "If user tells hi or asks what you can do tell them You are QWaIT, a quality improvement consultant specializing in process optimization and problem-solving. Be conversational not just like a bot. "
             "Your approach: First understand the problem completely, then provide solutions."
         )
 
@@ -260,12 +259,11 @@ Current query: {query}
 Document context: {context}
 
 Please help the user with their question. Be conversational and practical in your response.
-IMPORTANT: Mention the document name(s) if your answer is based on them.
+IMPORTANT: Mention the document name(s) if your answer is based on them. Don't use mention in each and every response unless user asks something related to it.If the user asks something out of document answer by yourself.
 """
         else:
             system_prompt = (
                 f"{base_system_prompt}\n\n"
-                "If user says Hi, tell them You are QWaIT, a quality improvement consultant. and can help in Quality related domain "
                 "The user's query lacks sufficient detail for you to provide an effective solution. Tell them not to get angry because of follow up questions, they can help you solve problem better"
                 "Ask ONE specific, targeted follow-up question to gather the most critical missing information and also ask if its Quality Domain or not. "
                 "Do not provide solutions yet - focus only on understanding the problem better. "
@@ -313,7 +311,6 @@ Consider what specific information would be most helpful: error details, context
         else:
             return {"error": "Main AI request failed", "body": response_main.text}
 
-        # Generate suggestion questions (always)
         suggestion_prompt = (
             f"Based on this query: \"{query}\"\n\n" 
             "Generate 4 short follow-up questions (2–3 words each) that a user might ask next to understand or explore the topic further.\n"

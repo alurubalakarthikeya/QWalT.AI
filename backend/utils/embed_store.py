@@ -104,12 +104,11 @@ def embed_and_store(text, file_name):
     vectorizer = SimpleVectorizer(max_features=300)
     vectors = vectorizer.fit_transform(structured_chunks)
 
-    # Convert to float32 matrix for FAISS
+
     import numpy as np
-    index = faiss.IndexFlatL2(len(vectors[0]))  # L2 distance
+    index = faiss.IndexFlatL2(len(vectors[0])) 
     index.add(np.array(vectors).astype("float32"))
 
-    # Save
     faiss.write_index(index, os.path.join(VECTOR_DIR, f"{file_name}.index"))
     with open(os.path.join(VECTOR_DIR, f"{file_name}_chunks.json"), "w", encoding="utf-8") as f:
         json.dump(structured_chunks, f, ensure_ascii=False, indent=2)

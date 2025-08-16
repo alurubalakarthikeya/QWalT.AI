@@ -24,6 +24,7 @@ body {
     width: 100vw;
     min-height: 500px;
     display: flex;
+    
     flex-direction: column;
     overflow: hidden;
     border: 1px solid #1e293b;
@@ -36,9 +37,7 @@ body {
     top: 0;
     left: 0;
     width: 100%;
-    background: 
-        rgba(59, 130, 246, 0.5)
-    ;
+    background:  rgba(59, 130, 246, 0.5);
     color: white;
     padding: 18px 24px;
     display: flex;
@@ -51,6 +50,14 @@ body {
     -webkit-backdrop-filter: blur(12px);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
+
+@media all and (display-mode: standalone) {
+    .chat-header {
+      padding-top: 3px !important;
+      background:  rgba(59, 130, 246);
+    } 
+  }
+  
 
 .chat-header .title {
     margin: 0;
@@ -147,13 +154,21 @@ body {
 .typing-indicator {
     display: flex;
     gap: 6px;
-    padding: 12px 18px;
+    padding: 6px 18px 6px 18px;
     background: rgba(14, 165, 233, 0.08);
     border-radius: 16px;
     border: 1px solid #38bdf8;
+    flex-direction: column;
     max-width: fit-content;
     margin: 6px 0;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+}
+
+.typing-indicator-dots{
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    padding: 0px 8px 8px 8px;
 }
 
 .typing-dot {
