@@ -166,7 +166,7 @@ body {
 
 .typing-indicator-dots{
     display: flex;
-    gap: 4px;
+    gap: 10px;
     align-items: center;
     padding: 0px 8px 8px 8px;
 }
@@ -635,7 +635,6 @@ body {
     }
 }
 
-/* === End of Modal Styles === */
 
 @media (max-width: 768px) {
     .chat-wrapper {
@@ -648,6 +647,14 @@ body {
     .chat-body .chat-message:last-child {
         margin-bottom: 100px;
     }
+
+    .icon {
+    height: 30px;
+    background-color: #0c77a8bc;
+    border-radius: 50%;
+    padding: 1px 2px;
+    border:#61add0bc solid 1.5px;
+}
 }
 
 @media (max-width: 480px) {
@@ -703,6 +710,14 @@ body {
         object-fit: cover;
         margin-bottom: 16px;
       }
+
+      .icon {
+    height: 40px;
+    background-color: #0c77a8bc;
+    border-radius: 50%;
+    padding: 1px 2px;
+    border:#61add0bc solid 1.5px;
+}
 }
 
 .scroll-toggle-btn {
@@ -783,4 +798,11 @@ body {
     align-items: center;
     justify-content: space-between;
   }
-  
+
+
+.side-icon{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}

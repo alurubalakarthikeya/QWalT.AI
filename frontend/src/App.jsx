@@ -4,7 +4,7 @@ import "./App.css";
 import { getUserId } from './utils';
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import uploadImg from "./assets/download.png";
-import logo from "./assets/logo.png";
+import icon from "./assets/icon.png";
 import ReactMarkdown from "react-markdown";
 
 const API_BASE_URL = 'https://backend-trail-06b6.onrender.com';
@@ -238,9 +238,10 @@ export default function App() {
   return (
     <div className="chat-wrapper">
       <div className="chat-header">
-        <h1 className="title">
-          <i className="fa-solid fa-robot"></i> QWalT
-        </h1>
+        <div className="side-icon">
+          <img src={icon} alt="icon" className="icon" />
+          <h1 className="title"> QWalT AI</h1>
+        </div>
         <button className="mode" onClick={handleInstallClick} disabled={isInstalled || !deferredPrompt}>
           {isInstalled ? "Friendly" : "Install"}
         </button>
