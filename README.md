@@ -29,13 +29,14 @@
 ### 1. Clone the repo
 
 ```bash
-git clone https://github.com/your-username/KneadQuality-AI.git
+git clone https://github.com/ayushsingh08-ds/KneadQuality-AI.git
 cd KneadQuality-AI
 ```
 
 ### 2. Create .env file with
 
 OPENROUTER_API_KEY=your_api_key_here
+( you can get your API key from OpenRouter Website )
 
 ### 3. Backend Setup
 
@@ -54,7 +55,6 @@ npm run dev
 ```
 
 ## Developers:
-
+<a href="https://github.com/alurubalakarthikeya">@Aluru Bala Karthikeya</a><br>
 <a href="https://github.com/ayushsingh08-ds">@Ayush Singh</a><br>
 <a href="https://github.com/ArjiJethin">@Arji Jethin Naga Sai Eswar</a><br> 
-<a href="https://github.com/alurubalakarthikeya">@Aluru Bala Karthikeya</a>
