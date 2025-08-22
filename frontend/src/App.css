@@ -19,18 +19,35 @@ body {
 .chat-wrapper {
     width: 100%;
     max-width: 100%;
-    background: linear-gradient(to bottom right, #0f172a, #1e293b);
     height: 100vh;
     width: 100vw;
     min-height: 500px;
     display: flex;
-    
     flex-direction: column;
     overflow: hidden;
     border: 1px solid #1e293b;
     margin: 0 auto;
     padding: 0;
+
+    /* Subtle animated gradient in theme shades */
+    background: linear-gradient(-45deg, #0b1c42, #242f41, #293f5f, #19263a);
+    background-size: 300% 300%;
+    animation: gradientFlow 15s ease-in-out infinite;
 }
+
+@keyframes gradientFlow {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+
 
 .chat-header {
     position: fixed;
@@ -656,6 +673,13 @@ body {
     padding: 1px 2px;
     border:#61add0bc solid 1.5px;
 }
+     .icon-type {
+    height: 17px;
+    background-color: #0c77a8bc;
+    border-radius: 50%;
+    padding: 1px 2px;
+    border:#61add0bc solid 1.5px;
+}
 }
 
 @media (max-width: 480px) {
@@ -714,6 +738,13 @@ body {
 
       .icon {
     height: 40px;
+    background-color: #0c77a8bc;
+    border-radius: 50%;
+    padding: 1px 2px;
+    border:#61add0bc solid 1.5px;
+}
+    .icon-type {
+    height: 18px;
     background-color: #0c77a8bc;
     border-radius: 50%;
     padding: 1px 2px;
@@ -804,6 +835,12 @@ body {
 .side-icon{
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
     gap: 10px;
+}
+
+.side-icon p{
+    font-style: italic;
+    font-size: 0.88rem;
+    color: #ffffff;
 }

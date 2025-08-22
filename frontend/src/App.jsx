@@ -267,9 +267,10 @@ export default function App() {
         )}
         {isBotTyping && (
           <div className="chat-message bot typing-indicator">
-            <p style={{ fontStyle: 'italic', fontSize: '0.85rem', marginTop: '0.5rem', color: '#ffffff' }}>
-              QWalT is thinking...
-            </p>
+            <div className="side-icon">
+              <img src={icon} alt="icon" className="icon-type" />
+              <p>QWalT is thinking...</p>
+            </div>
             <div className="typing-indicator-dots">
               <div className="typing-dot"></div>
               <div className="typing-dot"></div>
