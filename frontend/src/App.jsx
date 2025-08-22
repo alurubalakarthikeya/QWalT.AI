@@ -123,7 +123,7 @@ export default function App() {
           ...prev,
           {
             from: "bot",
-            text: `📄 **${data.filename}** uploaded and ready for questions.`,
+            text: ` **${data.filename}** uploaded and ready for questions.`,
             relatedQuestions: suggested,
           },
         ]);
