@@ -13,7 +13,12 @@ export default function App() {
   const [messages, setMessages] = useState([
     {
       from: "bot",
-      text: "Hey! I'm QWalT — your Quality Wizard AI. Ask me anything about quality improvement, Six Sigma, or process excellence!",
+      text: `**I’m QWalT** — I specialize in quality improvement, Six Sigma, Lean, and process excellence.  
+
+Whether you want to solve problems, analyze processes, track KPIs, or explore tools like 5 Whys, Fishbone, control charts, or value stream mapping.  
+
+Think of me as your digital quality coach — smarter, faster, and better.`,
+
     },
   ]);
   const [input, setInput] = useState("");
@@ -361,4 +366,3 @@ export default function App() {
     </div>
   );
 }
-

@@ -155,7 +155,7 @@ body {
     );
     color: #e2e8f0;
     border: 1px solid rgba(56, 189, 248, 0.5);
-    border-radius: 16px 16px 16px 4px;
+    border-radius: 18px 18px 18px 2px;
     align-self: flex-start;
     text-align: left;
     backdrop-filter: blur(10px);
@@ -166,12 +166,12 @@ body {
 .chat-message.user {
     background: linear-gradient(
         to right,
-        rgba(36, 40, 42, 0.4),
-        rgba(28, 100, 147, 0.2)
+        rgba(104, 189, 239, 0.2),
+        rgba(59, 130, 246, 0.3)
     );
     color: #ffffff;
     border: 1px solid #575b60;
-    border-radius: 16px 16px 4px 16px;
+    border-radius: 18px 18px 2px 18px;
     align-self: flex-end;
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
@@ -850,7 +850,7 @@ body {
 }
 
 .side-icon p{
-    font-style: italic;
-    font-size: 0.88rem;
+    font-size: 0.9rem;
     color: #ffffff;
+    font-weight: 500;
 }
