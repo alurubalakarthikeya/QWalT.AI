@@ -9,11 +9,24 @@ import ReactMarkdown from "react-markdown";
 
 const API_BASE_URL = 'https://backend-trail-06b6.onrender.com';
 
+const typingPhrases = [
+  "QWalT is thinking...",
+  "QWalT is analyzing...",
+  "QWalT is processing...",
+  "QWalT is calculating...",
+  "QWalT is evaluating...",
+  "QWalT is reviewing...",
+  "QWalT is optimizing...",
+  "QWalT is generating...",
+  "QWalT is assessing...",
+  "QWalT is crafting..."
+];
+
 export default function App() {
   const [messages, setMessages] = useState([
     {
       from: "bot",
-      text: `**I’m QWalT** — I specialize in quality improvement, Six Sigma, Lean, and process excellence.  
+      text: `**I'm QWalT** — I specialize in quality improvement, Six Sigma, Lean, and process excellence.  
 
 Whether you want to solve problems, analyze processes, track KPIs, or explore tools like 5 Whys, Fishbone, control charts, or value stream mapping.  
 
@@ -23,6 +36,7 @@ Think of me as your digital quality coach — smarter, faster, and better.`,
   ]);
   const [input, setInput] = useState("");
   const [isBotTyping, setIsBotTyping] = useState(false);
+  const [currentTypingText, setCurrentTypingText] = useState(typingPhrases[0]);
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [backToTop, setBackToTop] = useState(false);
@@ -32,6 +46,7 @@ Think of me as your digital quality coach — smarter, faster, and better.`,
 
   const chatEndRef = useRef(null);
   const chatBodyRef = useRef(null);
+  const typingIntervalRef = useRef(null);
 
   useEffect(() => {
     scrollToBottom();
@@ -52,6 +67,27 @@ Think of me as your digital quality coach — smarter, faster, and better.`,
     window.addEventListener("beforeinstallprompt", handler);
     return () => window.removeEventListener("beforeinstallprompt", handler);
   }, []);
+
+  useEffect(() => {
+    if (isBotTyping) {
+      setCurrentTypingText(typingPhrases[Math.floor(Math.random() * typingPhrases.length)]);
+      
+      typingIntervalRef.current = setInterval(() => {
+        setCurrentTypingText(typingPhrases[Math.floor(Math.random() * typingPhrases.length)]);
+      }, 3000);
+    } else {
+      if (typingIntervalRef.current) {
+        clearInterval(typingIntervalRef.current);
+        typingIntervalRef.current = null;
+      }
+    }
+
+    return () => {
+      if (typingIntervalRef.current) {
+        clearInterval(typingIntervalRef.current);
+      }
+    };
+  }, [isBotTyping]);
 
   const scrollToBottom = () => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -176,7 +212,7 @@ Think of me as your digital quality coach — smarter, faster, and better.`,
       });
 
       const data = await res.json();
-      const botResponse = data.result || data.error || "⚠️ AI didn’t reply. Check backend logs.";
+      const botResponse = data.result || data.error || "⚠️ AI didn't reply. Check backend logs.";
 
       const suggested = Array.isArray(data.suggested_questions)
         ? data.suggested_questions.map((q) => ({ text: q }))
@@ -202,7 +238,12 @@ Think of me as your digital quality coach — smarter, faster, and better.`,
         ...prev,
         {
           from: "bot",
-          text: `You asked: "${msg}"\n\n🚫 Server is unreachable.`,
+          text: (
+                  <>
+                    You asked: "{msg}" <br /><br />
+                    <i className="fa-solid fa-triangle-exclamation"></i> Server is unreachable.
+                  </>
+                ),
         },
       ]);
     } finally {
@@ -212,6 +253,10 @@ Think of me as your digital quality coach — smarter, faster, and better.`,
 
   const renderBotMessage = (msg, idx) => (
     <div key={idx} className="chat-message bot">
+      <div className="botside-icon">
+        <img src={icon} alt="icon" className="icon-type" />
+        <p>QWalT AI</p>
+      </div>
       <ReactMarkdown>{msg.text}</ReactMarkdown>
       {msg.relatedQuestions?.length > 0 && (
         <div className="popular-questions">
@@ -274,7 +319,7 @@ Think of me as your digital quality coach — smarter, faster, and better.`,
           <div className="chat-message bot typing-indicator">
             <div className="side-icon">
               <img src={icon} alt="icon" className="icon-type" />
-              <p>QWalT is thinking...</p>
+              <p>{currentTypingText}</p>
             </div>
             <div className="typing-indicator-dots">
               <div className="typing-dot"></div>
