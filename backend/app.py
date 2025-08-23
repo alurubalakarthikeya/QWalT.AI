@@ -140,7 +140,7 @@ async def upload_file(file: UploadFile = File(...)):
                 "Content-Type": "application/json"
             },
             json={
-                "model": "mistralai/mistral-7b-instruct",
+                "model": "mistralai/mixtral-8x7b-instruct",
                 "messages": [{"role": "user", "content": suggestion_prompt}],
                 "max_tokens": 80,
                 "temperature": 0.7
@@ -281,7 +281,7 @@ Consider what specific information would be most helpful: error details, context
 """
 
         payload = {
-            "model": "mistralai/mistral-7b-instruct",
+            "model": "mistralai/mixtral-8x7b-instruct",
             "messages": [
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt}
@@ -329,7 +329,7 @@ Consider what specific information would be most helpful: error details, context
                 "Content-Type": "application/json"
             },
             json={
-                "model": "mistralai/mistral-7b-instruct",
+                "model": "mistralai/mixtral-8x7b-instruct",
                 "messages": [
                     {"role": "user", "content": suggestion_prompt}
                 ],
