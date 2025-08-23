@@ -24,6 +24,7 @@ export default function App() {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [showInstallPrompt, setShowInstallPrompt] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
+  const [isInstallable, setIsInstallable] = useState(false);
 
   const chatEndRef = useRef(null);
   const chatBodyRef = useRef(null);
@@ -33,19 +34,48 @@ export default function App() {
   }, [messages, isBotTyping]);
 
   useEffect(() => {
-    const installed = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-    setIsInstalled(installed);
-
-    window.addEventListener('appinstalled', () => setIsInstalled(true));
-
-    const handler = (e) => {
-      e.preventDefault();
-      setDeferredPrompt(e);
-      setShowInstallPrompt(true);
+    // Check if already installed
+    const checkInstalled = () => {
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
+                          window.navigator.standalone || 
+                          document.referrer.includes('android-app://');
+      setIsInstalled(isStandalone);
+      return isStandalone;
     };
 
-    window.addEventListener("beforeinstallprompt", handler);
-    return () => window.removeEventListener("beforeinstallprompt", handler);
+    checkInstalled();
+
+    // Listen for app installed event
+    const handleAppInstalled = () => {
+      setIsInstalled(true);
+      setShowInstallPrompt(false);
+      setDeferredPrompt(null);
+      console.log('PWA was installed');
+    };
+
+    window.addEventListener('appinstalled', handleAppInstalled);
+
+    // Handle beforeinstallprompt event
+    const handleBeforeInstallPrompt = (e) => {
+      console.log('beforeinstallprompt fired');
+      // Prevent Chrome 67 and earlier from automatically showing the prompt
+      e.preventDefault();
+      // Stash the event so it can be triggered later
+      setDeferredPrompt(e);
+      // Show install button if not already installed
+      if (!checkInstalled()) {
+        setShowInstallPrompt(true);
+        setIsInstallable(true);
+      }
+    };
+
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+
+    // Clean up event listeners
+    return () => {
+      window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+      window.removeEventListener('appinstalled', handleAppInstalled);
+    };
   }, []);
 
   const scrollToBottom = () => {
@@ -71,18 +101,38 @@ export default function App() {
     }
   };
 
-  const handleInstallClick = () => {
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
-      deferredPrompt.userChoice.then((choiceResult) => {
-        if (choiceResult.outcome === "accepted") {
-          console.log("User accepted the install prompt");
-        } else {
-          console.log("User dismissed the install prompt");
-        }
-        setDeferredPrompt(null);
-        setShowInstallPrompt(false);
-      });
+  const handleInstallClick = async () => {
+    console.log('Install button clicked');
+    console.log('deferredPrompt:', deferredPrompt);
+    console.log('isInstalled:', isInstalled);
+    
+    if (!deferredPrompt) {
+      console.log('No deferred prompt available');
+      return;
+    }
+
+    try {
+      // Show the install prompt
+      console.log('Showing install prompt...');
+      await deferredPrompt.prompt();
+      
+      // Wait for the user to respond to the prompt
+      const choiceResult = await deferredPrompt.userChoice;
+      console.log('User choice:', choiceResult);
+      
+      if (choiceResult.outcome === 'accepted') {
+        console.log('User accepted the install prompt');
+        // The app will be installed, appinstalled event will fire
+      } else {
+        console.log('User dismissed the install prompt');
+      }
+      
+      // Clear the deferred prompt
+      setDeferredPrompt(null);
+      setShowInstallPrompt(false);
+      
+    } catch (error) {
+      console.error('Error during installation:', error);
     }
   };
 
@@ -171,7 +221,7 @@ export default function App() {
       });
 
       const data = await res.json();
-      const botResponse = data.result || data.error || "⚠️ AI didn’t reply. Check backend logs.";
+      const botResponse = data.result || data.error || "⚠️ AI didn't reply. Check backend logs.";
 
       const suggested = Array.isArray(data.suggested_questions)
         ? data.suggested_questions.map((q) => ({ text: q }))
@@ -235,6 +285,16 @@ export default function App() {
     </div>
   );
 
+  // Determine button text and state
+  const getInstallButtonText = () => {
+    if (isInstalled) return "Friendly";
+    return "Install";
+  };
+
+  const isInstallButtonDisabled = () => {
+    return isInstalled || !deferredPrompt;
+  };
+
   return (
     <div className="chat-wrapper">
       <div className="chat-header">
@@ -242,8 +302,13 @@ export default function App() {
           <img src={icon} alt="icon" className="icon" />
           <h1 className="title"> QWalT AI</h1>
         </div>
-        <button className="mode" onClick={handleInstallClick} disabled={isInstalled || !deferredPrompt}>
-          {isInstalled ? "Friendly" : "Install"}
+        <button 
+          className="mode" 
+          onClick={handleInstallClick} 
+          disabled={isInstallButtonDisabled()}
+          title={isInstalled ? "App is installed" : "Install PWA"}
+        >
+          {getInstallButtonText()}
         </button>
       </div>
 
@@ -361,4 +426,3 @@ export default function App() {
     </div>
   );
 }
-

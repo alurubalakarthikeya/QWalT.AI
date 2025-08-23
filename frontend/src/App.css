@@ -73,6 +73,16 @@ body {
       padding-top: 3px !important;
       background:  rgba(59, 130, 246);
     } 
+
+    .icon {
+    height: 30px;
+    background-color: rgba(59, 130, 246);
+    border-radius: 50%;
+    padding: 1px 2px;
+    border:#61add0bc solid 1.5px;
+    }
+
+    
   }
   
 
