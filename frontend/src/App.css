@@ -677,13 +677,13 @@ body {
 
     .icon {
     height: 30px;
-    background-color: #0c77a8bc;
+    background-color: rgba(59, 130, 246, 0.2);
     border-radius: 50%;
     padding: 1px 2px;
     border:#61add0bc solid 1.5px;
 }
      .icon-type {
-    height: 17px;
+    height: 20px;
     background-color: #0c77a8bc;
     border-radius: 50%;
     padding: 1px 2px;
@@ -745,20 +745,20 @@ body {
         margin-bottom: 16px;
       }
 
-      .icon {
-    height: 40px;
-    background-color: #0c77a8bc;
-    border-radius: 50%;
-    padding: 1px 2px;
-    border:#61add0bc solid 1.5px;
-}
+    .icon {
+       height: 40px;
+       background-color: rgba(59, 130, 246, 0.2);
+       border-radius: 50%;
+       padding: 1px 2px;
+       border:#61add0bc solid 1.5px;
+    }
     .icon-type {
-    height: 18px;
-    background-color: #0c77a8bc;
-    border-radius: 50%;
-    padding: 1px 2px;
-    border:#61add0bc solid 1.5px;
-}
+       height: 21px;
+       background-color: #0c77a8bc;
+       border-radius: 50%;
+       padding: 1px 2px;
+       border:#61add0bc solid 1.5px;
+    }
 }
 
 .scroll-toggle-btn {
