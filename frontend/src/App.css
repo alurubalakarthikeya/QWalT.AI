@@ -862,3 +862,12 @@ body {
     margin-bottom: -14px;
 }
 
+@media all and (display-mode: standalone) {
+  .chat-input {
+    padding-bottom: calc(12px + env(safe-area-inset-bottom));
+  }
+
+  .chat-body {
+    padding-bottom: calc(90px + env(safe-area-inset-bottom));
+  }
+}
