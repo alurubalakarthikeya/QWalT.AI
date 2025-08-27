@@ -922,3 +922,8 @@ body {
     max-width: 70%; 
   }
 }
+
+.chat-header .side-icon{
+    margin-top: 5px;
+    margin-left: 5px;
+}
