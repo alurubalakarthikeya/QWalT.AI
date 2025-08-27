@@ -5,6 +5,7 @@ import { getUserId } from './utils';
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import uploadImg from "./assets/download.png";
 import icon from "./assets/icon.png";
+import userIcon from "./assets/user.png";
 import ReactMarkdown from "react-markdown";
 
 const API_BASE_URL = 'https://backend-trail-06b6.onrender.com';
@@ -311,6 +312,10 @@ Think of me as your digital quality coach — smarter, faster, and better.`,
             renderBotMessage(msg, idx)
           ) : (
             <div key={idx} className="chat-message user">
+              <div className="side-icon">
+                <img src={userIcon} alt="icon" className="icon-type user-icon" />
+                <p>You</p>
+              </div>
               <div>{msg.text}</div>
             </div>
           )
