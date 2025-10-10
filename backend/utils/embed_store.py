@@ -3,8 +3,14 @@ import re
 import json
 import math
 import textwrap
-import faiss
 from collections import Counter
+
+# Try to import faiss, fallback to simple search if not available
+try:
+    import faiss
+    FAISS_AVAILABLE = True
+except ImportError:
+    FAISS_AVAILABLE = False
 
 VECTOR_DIR = "vector_db"
 if not os.path.exists(VECTOR_DIR):
@@ -104,18 +110,20 @@ def embed_and_store(text, file_name):
     vectorizer = SimpleVectorizer(max_features=300)
     vectors = vectorizer.fit_transform(structured_chunks)
 
-
-    import numpy as np
-    index = faiss.IndexFlatL2(len(vectors[0])) 
-    index.add(np.array(vectors).astype("float32"))
-
-    faiss.write_index(index, os.path.join(VECTOR_DIR, f"{file_name}.index"))
+    if FAISS_AVAILABLE:
+        import numpy as np
+        index = faiss.IndexFlatL2(len(vectors[0])) 
+        index.add(np.array(vectors).astype("float32"))
+        faiss.write_index(index, os.path.join(VECTOR_DIR, f"{file_name}.index"))
+    
+    # Always save chunks and vectorizer for fallback
     with open(os.path.join(VECTOR_DIR, f"{file_name}_chunks.json"), "w", encoding="utf-8") as f:
         json.dump(structured_chunks, f, ensure_ascii=False, indent=2)
     with open(os.path.join(VECTOR_DIR, f"{file_name}_vectorizer.json"), "w", encoding="utf-8") as f:
         json.dump({
             "vocab": vectorizer.vocabulary,
-            "idf": vectorizer.idf_values
+            "idf": vectorizer.idf_values,
+            "vectors": vectors  # Store vectors for simple search
         }, f, indent=2)
 
 
@@ -130,30 +138,48 @@ def load_vectorizer(file_name):
 
 
 def query_vector_store(query, file_name, top_k=3):
-    index_path = os.path.join(VECTOR_DIR, f"{file_name}.index")
     chunks_path = os.path.join(VECTOR_DIR, f"{file_name}_chunks.json")
     vectorizer_path = os.path.join(VECTOR_DIR, f"{file_name}_vectorizer.json")
 
-    if not all(os.path.exists(p) for p in [index_path, chunks_path, vectorizer_path]):
+    if not all(os.path.exists(p) for p in [chunks_path, vectorizer_path]):
         return "Document not indexed."
 
     try:
-        index = faiss.read_index(index_path)
-
         with open(chunks_path, "r", encoding="utf-8") as f:
             chunks = json.load(f)
 
-        vectorizer = load_vectorizer(file_name)
-        query_vec = vectorizer.transform([query])[0]
-
-        import numpy as np
-        query_array = np.array([query_vec], dtype="float32")
-        distances, indices = index.search(query_array, top_k)
-
-        results = []
-        for idx in indices[0]:
-            if idx < len(chunks):
-                results.append(chunks[idx])
+        with open(vectorizer_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        
+        # Use FAISS if available, otherwise simple search
+        if FAISS_AVAILABLE and os.path.exists(os.path.join(VECTOR_DIR, f"{file_name}.index")):
+            index = faiss.read_index(os.path.join(VECTOR_DIR, f"{file_name}.index"))
+            vectorizer = load_vectorizer(file_name)
+            query_vec = vectorizer.transform([query])[0]
+            
+            import numpy as np
+            query_array = np.array([query_vec], dtype="float32")
+            distances, indices = index.search(query_array, top_k)
+            
+            results = []
+            for idx in indices[0]:
+                if idx < len(chunks):
+                    results.append(chunks[idx])
+        else:
+            # Simple keyword search fallback
+            query_words = set(query.lower().split())
+            scored_chunks = []
+            
+            for i, chunk in enumerate(chunks):
+                chunk_words = set(chunk.lower().split())
+                score = len(query_words.intersection(chunk_words))
+                if score > 0:
+                    scored_chunks.append((score, chunk))
+            
+            # Sort by score and take top_k
+            scored_chunks.sort(reverse=True, key=lambda x: x[0])
+            results = [chunk for score, chunk in scored_chunks[:top_k]]
+        
         return "\n\n".join(results) if results else "No relevant chunks found."
 
     except Exception as e:

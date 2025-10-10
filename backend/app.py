@@ -4,7 +4,6 @@ from pydantic import BaseModel
 from dotenv import load_dotenv
 from uuid import uuid4
 from typing import List, Union
-from contextlib import asynccontextmanager
 
 import os
 import json
@@ -15,28 +14,6 @@ from utils.embed_store import embed_and_store, query_vector_store
 from utils.extract_text import extract_text
 
 load_dotenv()
-
-# Model warm-up to reduce first response time
-def warm_up_model():
-    """Warm up the model with a simple request to reduce initial latency"""
-    try:
-        api_key = os.getenv("OPENROUTER_API_KEY")
-        if api_key:
-            requests.post(
-                "https://openrouter.ai/api/v1/chat/completions",
-                headers={
-                    "Authorization": f"Bearer {api_key}",
-                    "Content-Type": "application/json"
-                },
-                json={
-                    "model": "mistralai/mistral-7b-instruct",
-                    "messages": [{"role": "user", "content": "Hi"}],
-                    "max_tokens": 5
-                },
-                timeout=3
-            )
-    except:
-        pass  # Ignore warm-up errors
 
 # stores chat history as json 
 HISTORY_DIR = "history_logs"
@@ -100,15 +77,7 @@ class QueryRequest(BaseModel):
     query: str
     file_name: str = None
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    # Startup: warm up model in background
-    import threading
-    threading.Thread(target=warm_up_model, daemon=True).start()
-    yield
-    # Shutdown: cleanup if needed
-
-app = FastAPI(lifespan=lifespan)
+app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
@@ -394,17 +363,7 @@ async def query_document_json(request: QueryRequest):
 
 @app.get("/health")
 async def health_check():
-    try:
-        import psutil
-        process = psutil.Process(os.getpid())
-        memory_mb = process.memory_info().rss / 1024 / 1024
-        return {
-            "status": "healthy",
-            "memory_mb": round(memory_mb, 2),
-            "version": "optimized"
-        }
-    except ImportError:
-        return {"status": "healthy", "version": "optimized"}
+    return {"status": "healthy", "version": "optimized"}
 
 if __name__ == "__main__":
     import uvicorn

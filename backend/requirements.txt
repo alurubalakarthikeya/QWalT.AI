@@ -4,8 +4,6 @@ python-multipart
 pydantic
 requests
 python-dotenv
-faiss-cpu
 pdfplumber
 python-docx
-psutil
 numpy
