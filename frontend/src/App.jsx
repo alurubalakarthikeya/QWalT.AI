@@ -8,7 +8,7 @@ import icon from "./assets/icon.png";
 import userIcon from "./assets/user.png";
 import ReactMarkdown from "react-markdown";
 
-const API_BASE_URL = 'https://backend-trail-06b6.onrender.com';
+const API_BASE_URL = 'http://localhost:8000';
 
 const typingPhrases = [
   "QWalT is thinking...",
