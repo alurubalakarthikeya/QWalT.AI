@@ -103,9 +103,15 @@ class QueryRequest(BaseModel):
     query: str
     file_name: str = None
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: warm up model in background
+    import threading
+    threading.Thread(target=warm_up_model, daemon=True).start()
+    yield
+    # Shutdown: cleanup if needed
 
-@asynccontextmanager\nasync def lifespan(app: FastAPI):\n    # Startup: warm up model in background\n    import threading\n    threading.Thread(target=warm_up_model, daemon=True).start()\n    yield\n    # Shutdown: cleanup if needed\n\napp = FastAPI(lifespan=lifespan)
+app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
