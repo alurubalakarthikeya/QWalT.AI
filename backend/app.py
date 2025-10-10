@@ -10,9 +10,6 @@ import os
 import json
 import requests
 import re
-import asyncio
-import aiohttp
-from concurrent.futures import ThreadPoolExecutor
 
 from utils.embed_store import embed_and_store, query_vector_store
 from utils.extract_text import extract_text
