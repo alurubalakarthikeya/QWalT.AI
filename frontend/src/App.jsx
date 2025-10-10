@@ -8,19 +8,16 @@ import icon from "./assets/icon.png";
 import userIcon from "./assets/user.png";
 import ReactMarkdown from "react-markdown";
 
-const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL = 'https://backend-trail-06b6.onrender.com';
 
 const typingPhrases = [
   "QWalT is thinking...",
-  "QWalT is analyzing...",
+  "QWalT is working on it...",
   "QWalT is processing...",
-  "QWalT is calculating...",
-  "QWalT is evaluating...",
+  "QWalT is analyzing...",
+  "QWalT is preparing response...",
   "QWalT is reviewing...",
-  "QWalT is optimizing...",
-  "QWalT is generating...",
-  "QWalT is assessing...",
-  "QWalT is crafting..."
+  "QWalT is figuring it out..."
 ];
 
 export default function App() {
