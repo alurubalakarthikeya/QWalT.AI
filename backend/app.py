@@ -43,31 +43,35 @@ def analyze_query_completeness(query, chat_history, context_length=0):
     query_lower = query.lower()
     word_count = len(query.split())
 
-    detail_indicators = [
-        "error", "message", "code", "when i", "after i", "version",
-        "browser", "device", "app", "website", "file", "database"
+    # Specific problem indicators - can provide solution
+    solution_indicators = [
+        "error", "problem", "issue", "bug", "fix", "help", "how to", "what is",
+        "explain", "process", "quality", "improve", "optimize", "lean", "six sigma",
+        "defect", "variance", "control chart", "fishbone", "5 why", "kaizen",
+        "efficiency", "productivity", "waste", "bottleneck", "workflow",
+        "standard", "procedure", "training", "implementation", "analysis",
+        "measurement", "kpi", "metric", "performance", "audit", "compliance"
     ]
 
-    vague_indicators = [
-        "something wrong", "acting weird", "strange behavior",
-        "not sure what", "confused about", "having issues",
-        "improve process", "optimize workflow", "quality issue",
-        "efficiency problem", "bottleneck", "performance issue"
+    # Only require clarification for extremely vague queries
+    extremely_vague = [
+        "help me", "need help", "what do", "don't know", "confused",
+        "something wrong", "not working", "having trouble"
     ]
 
-    has_detail = any(term in query_lower for term in detail_indicators)
-    is_vague = any(term in query_lower for term in vague_indicators)
-
-    if context_length > 100:
+    has_solution_context = any(term in query_lower for term in solution_indicators)
+    is_extremely_vague = any(phrase in query_lower for phrase in extremely_vague) and word_count <= 4
+    
+    # If context available or has solution indicators, provide answer
+    if context_length > 50 or has_solution_context:
         return True
 
-    if has_detail or word_count > 10:
-        return True
-
-    if is_vague and word_count <= 10:
+    # Only ask for clarification if extremely vague and short
+    if is_extremely_vague:
         return False
 
-    return word_count > 12
+    # Default to providing helpful response for most queries
+    return word_count >= 3
 
 class QueryRequest(BaseModel):
     query: str
@@ -140,12 +144,12 @@ async def upload_file(file: UploadFile = File(...)):
                 "Content-Type": "application/json"
             },
             json={
-                "model": "openrouter/auto",
+                "model": "mistralai/mistral-7b-instruct",
                 "messages": [{"role": "user", "content": suggestion_prompt}],
-                "max_tokens": 80,
-                "temperature": 0.7
+                "max_tokens": 30,
+                "temperature": 0.6
             },
-            timeout=15
+            timeout=5
         )
 
         if suggestion_response.status_code == 200:
@@ -231,8 +235,13 @@ async def query_document(
             base_system_prompt = json.load(f)["system_prompt"]
     else:
         base_system_prompt = (
-            "If user tells hi or asks what you can do tell them You are QWaIT, a quality improvement consultant specializing in process optimization and problem-solving. Be conversational not just like a bot. "
-            "Your approach: First understand the problem completely, then provide solutions."
+            "You are QWalT, an expert quality improvement consultant with deep knowledge in: "
+            "• Process optimization and Lean manufacturing • Six Sigma methodologies and DMAIC "
+            "• Quality control tools (Fishbone, 5 Whys, Control Charts, Pareto Analysis) "
+            "• Root cause analysis and problem-solving • KPI development and measurement "
+            "• Workflow improvement and waste reduction • Standard operating procedures "
+            "• Training and implementation strategies • Compliance and audit processes. "
+            "Be conversational, practical, and solution-focused. Avoid formal structures or role tags."
         )
 
     try:
@@ -243,51 +252,38 @@ async def query_document(
         if has_enough_info:
             system_prompt = (
                 f"{base_system_prompt}\n\n"
-                "The user has provided sufficient detail about their problem. "
-                "Respond in a conversational, helpful tone. Give practical solutions without formal structure. "
-                "Be friendly, direct, and focus on actually helping them solve their issue. "
-                "Start with a brief acknowledgment, then provide clear steps or explanations. "
-                "Avoid formal headings like 'Problem Summary' or 'Root Cause Analysis' - just have a natural conversation. "
-                "IMPORTANT: When including code examples, always format them properly using markdown code blocks with triple backticks (```) and specify the language when appropriate (```html, ```css, ```javascript, etc.)."
+                "Provide practical solutions. Be direct and concise. Use quality expertise."
             )
             user_prompt = f"""
-Conversation history:
-{conversation_context}
+{f'Context: {conversation_context[-150:]}' if conversation_context else ''}
 
-Current query: {query}
+Q: {query}
 
-Document context: {context}
+{f'Info: {context[:200]}' if context != 'No specific document context available.' else ''}
 
-Please help the user with their question. Be conversational and practical in your response.
-IMPORTANT: Mention the document name(s) if your answer is based on them. Don't use mention in each and every response unless user asks something related to it.If the user asks something out of document answer by yourself.
+Answer:
 """
         else:
             system_prompt = (
                 f"{base_system_prompt}\n\n"
-                "The user's query lacks sufficient detail for you to provide an effective solution. Tell them not to get angry because of follow up questions, they can help you solve problem better"
-                "Ask ONE specific, targeted follow-up question to gather the most critical missing information and also ask if its Quality Domain or not. "
-                "Do not provide solutions yet - focus only on understanding the problem better. "
-                "Make your question clear and actionable."
-                "If user asks vague issues like company related, office related, job related issues, some error, company trouble, dont guess. Instead, ask them to upload a manual, screenshot, or describe the issue in detail before proceeding with help."
+                "Brief query. Give helpful guidance + ask ONE specific question."
             )
             user_prompt = f"""
-Conversation history:
-{conversation_context}
+{f'Context: {conversation_context[-100:]}' if conversation_context else ''}
 
-Current query: {query}
+Q: {query}
 
-This query needs more detail. Ask ONE focused follow-up question to understand the problem better. 
-Consider what specific information would be most helpful: error details, context, timing, impact, or steps already tried.
+Give guidance + ask ONE question:
 """
 
         payload = {
-            "model": "openrouter/auto",
+            "model": "mistralai/mistral-7b-instruct",
             "messages": [
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt}
             ],
-            "max_tokens": 400 if has_enough_info else 100,
-            "temperature": 0.6
+            "max_tokens": 180 if has_enough_info else 60,
+            "temperature": 0.4
         }
 
         response_main = requests.post(
@@ -297,7 +293,7 @@ Consider what specific information would be most helpful: error details, context
                 "Content-Type": "application/json"
             },
             json=payload,
-            timeout=30
+            timeout=10
         )
 
         ai_reply = ""
@@ -311,15 +307,7 @@ Consider what specific information would be most helpful: error details, context
         else:
             return {"error": "Main AI request failed", "body": response_main.text}
 
-        suggestion_prompt = (
-            f"Based on this query: \"{query}\"\n\n" 
-            "Generate 4 short follow-up questions (2–3 words each) that a user might ask next to understand or explore the topic further.\n"
-            "If the user query strongly suggests a need for a specific tool (e.g., analytics tool, testing tool, automation framework), include one such tool-related suggestion. "
-            "But do this **only** if it is clearly beneficial and not speculative.\n"
-            "Examples of good suggestions: 'Try JMeter', 'Use Postman', 'Analyze with Excel'.\n"
-            "Examples to avoid: vague or forced tool mentions.\n\n"
-            "Respond as a simple numbered list only."
-        )
+        suggestion_prompt = f"Query: \"{query[:50]}\"\nGenerate 3 short questions (2-3 words). List format."
 
 
         suggestion_response = requests.post(
@@ -329,27 +317,27 @@ Consider what specific information would be most helpful: error details, context
                 "Content-Type": "application/json"
             },
             json={
-                "model": "openrouter/auto",
+                "model": "mistralai/mistral-7b-instruct",
                 "messages": [
                     {"role": "user", "content": suggestion_prompt}
                 ],
-                "max_tokens": 60,
-                "temperature": 0.7
+                "max_tokens": 25,
+                "temperature": 0.6
             },
-            timeout=15
+            timeout=5
         )
 
         suggestions = []
         if suggestion_response.status_code == 200:
             raw = suggestion_response.json()["choices"][0]["message"]["content"]
-            lines = raw.strip().split('\n')
+            lines = raw.strip().split('\n')[:3]  # Limit to first 3 lines for speed
             for line in lines:
                 clean_line = re.sub(r'^\d+\.?\s*', '', line.strip())
                 clean_line = clean_line.strip('."\'')
                 word_count = len(clean_line.split())
                 if 1 < word_count <= 3:
                     suggestions.append(clean_line)
-            suggestions = suggestions[:4]
+            suggestions = suggestions[:3]  # Maximum 3 suggestions
 
         return {
             "result": ai_reply,
@@ -375,18 +363,8 @@ async def query_document_json(request: QueryRequest):
 
 @app.get("/health")
 async def health_check():
-    try:
-        import psutil
-        process = psutil.Process(os.getpid())
-        memory_mb = process.memory_info().rss / 1024 / 1024
-        return {
-            "status": "healthy",
-            "memory_mb": round(memory_mb, 2),
-            "version": "optimized"
-        }
-    except ImportError:
-        return {"status": "healthy", "version": "optimized"}
+    return {"status": "healthy", "version": "optimized"}
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8000, log_level="debug")

@@ -369,7 +369,6 @@ body {
     transform: translateY(-2px);
 }
 
-/* === Modal Styles === */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -410,7 +409,7 @@ body {
     );
     border: 1px solid rgba(56, 189, 248, 0.5);
     border-radius: 16px;
-    padding: 40px 36px 36px 36px; /* increased padding inside */
+    padding: 40px 36px 36px 36px;
     margin: 20px;
     color: #e2e8f0;
     text-align: center;
@@ -422,7 +421,6 @@ body {
     display: none;
 }
 
-/* === Close Button === */
 .modal-close-btn {
     position: absolute;
     top: 8px;
